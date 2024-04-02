@@ -1,10 +1,10 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
-from View.NumberLineEdit import NumberLineEdit
-from .VariableView import VariableView
+from .NumberLineEdit import NumberLineEdit
+from .VariableInputView import VariableInputView
 
 
 class Constraint(QWidget):
-    def __init__(self):
+    def __init__(self, var_no=2):
         super().__init__()
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
@@ -13,7 +13,7 @@ class Constraint(QWidget):
         self.layout.addWidget(self.equals)
         self.layout.addWidget(self.eq_label)
         self.vars = []
-        self.synchronize_variables(2)
+        self.synchronize_variables(var_no)
 
     def synchronize_variables(self, var_no: int):
         if var_no < len(self.vars):
@@ -23,7 +23,6 @@ class Constraint(QWidget):
         else:
             old_len = len(self.vars)
             for i in range(len(self.vars), var_no):
-                self.vars.append(VariableView(i))
+                self.vars.append(VariableInputView(i))
             for i in range(old_len, len(self.vars)):
                 self.layout.addWidget(self.vars[i])
-

@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
-from .VariableView import VariableView
+from .VariableInputView import VariableInputView
 
 
 class Function(QWidget):
@@ -20,6 +20,6 @@ class Function(QWidget):
         else:
             old_len = len(self.vars)
             for i in range(len(self.vars), var_no):
-                self.vars.append(VariableView(i))
+                self.vars.append(VariableInputView(i))
             for i in range(old_len, len(self.vars)):
                 self.layout.addWidget(self.vars[i])

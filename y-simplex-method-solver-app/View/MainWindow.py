@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         self.constraint_number = QSpinBox()
         self.constraint_number.setMinimum(1)
         self.constraint_number.setValue(2)
+        self.constraint_number.valueChanged.connect(self.input_box.set_constraints)
         self.layout.addWidget(self.constraint_number, 1, 3)
 
         self.layout.addWidget(QPushButton("Compute"))

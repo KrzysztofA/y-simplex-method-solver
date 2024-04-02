@@ -22,4 +22,3 @@ class MenuBar(QMenuBar):
         help_menu.addAction("About")
         help_menu.addAction("Credits")
         help_menu.addAction("Contact")
-
