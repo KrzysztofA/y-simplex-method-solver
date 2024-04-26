@@ -12,6 +12,8 @@ namespace yasuzume::simplex
   {
     assert( !built );
     matrix_representation.append_row<std::initializer_list<Fraction>>( _list.begin(), _list.end() - 1, true );
+    constraints_number++;
+    variables_number = std::max( std::ssize( _list ), variables_number );
     result_column.emplace_back( *( _list.end() - 1 ) );
   }
 
@@ -20,6 +22,28 @@ namespace yasuzume::simplex
     assert( !built );
     function = _list;
     function.pop_back();
+    variables_number = std::max( std::ssize( _list ), variables_number );
+    for( auto& f : function )
+    {
+      f /= *( _list.end() - 1 );
+    }
+  }
+
+  void Simplex::add_constraint( std::vector<Fraction> _list )
+  {
+    assert( !built );
+    matrix_representation.append_row<std::vector<Fraction>>( _list.begin(), _list.end() - 1, true );
+    constraints_number++;
+    variables_number = std::max( std::ssize( _list ), variables_number );
+    result_column.emplace_back( *( _list.end() - 1 ) );
+  }
+
+  void Simplex::set_function( const std::vector<Fraction>& _list )
+  {
+    assert( !built );
+    function = _list;
+    function.pop_back();
+    variables_number = std::max( std::ssize( _list ), variables_number );
     for( auto& f : function )
     {
       f /= *( _list.end() - 1 );
@@ -29,22 +53,20 @@ namespace yasuzume::simplex
   void Simplex::build( const ProblemType _problem )
   {
     assert( !built );
-    if( _problem == ProblemType::Minimization )
+    problem_type = _problem;
+    if( problem_type == ProblemType::Minimization )
     {
       matrix_representation = matrix_representation.transpose();
       std::swap( result_column, function );
     }
-    std::cout << matrix_representation.to_string();
-    for( auto i : result_column ) std::cout << i << " ";
-    std::cout << "\n";
-    for( auto i : function ) std::cout << i << " ";
-    std::cout << "\n";
+
+    while( result_column.size() < function.size() ) result_column.emplace_back( 0 );
     for( auto& f : function ) f *= -1;
+
     matrix_representation.append_row<std::vector<Fraction>>( function.begin(), function.end(), true );
-    matrix_representation.append_to_column_end( DMatrix<Fraction>::identity( matrix_representation.column_size() ), true );
+    matrix_representation.append_to_column_end( DMatrix<Fraction>::identity( constraints_number + 1 ), true );
     matrix_representation.append_column<std::vector<Fraction>>( result_column.begin(), result_column.end(), true );
     built = true;
-    std::cout << matrix_representation.to_string();
   }
 
   void Simplex::next()
@@ -64,11 +86,12 @@ namespace yasuzume::simplex
     const auto last_column { matrix_representation.column( matrix_representation.row_size() - 1 ) };
     const auto index_column { matrix_representation.column( pivot_x ) };
 
-    // Find Pivot
+    // Find Pivot by sorting the candidates
 
     std::vector<Fraction> candidates {};
     for( auto i { 0 }; i < std::ssize( index_column ) - 1; i++ ) candidates.emplace_back( last_column[ i ] / index_column[ i ] );
     auto                                                                      enumerated_candidates { enumerate<Fraction>( candidates ) };
+    std::erase_if( enumerated_candidates, []( const Enumerator<Fraction>& _item ) { return _item.value < 0; } );
     std::ranges::sort( enumerated_candidates, []( const Enumerator<Fraction>& _item, const Enumerator<Fraction>& _item_2 ) { return _item.value < _item_2.value; } );
     const auto                                                                pivot_y { enumerated_candidates[ 0 ].index };
 
@@ -95,41 +118,75 @@ namespace yasuzume::simplex
   void Simplex::compute_solution()
   {
     assert( built );
-    while( !solved ) 
+    while( !solved )
     {
       next();
-      if( non_feasible ) break;
+      if( non_feasible ) return;
     }
+    steps.emplace_back( matrix_representation );
+    cache_solution();
   }
 
-  std::vector<Fraction> Simplex::get_solution() const
+  void Simplex::cache_solution()
   {
     assert( solved );
-    if( non_feasible ) return { 0 };
-    const auto temp { matrix_representation.column( matrix_representation.row_size() - 1 ) };
+    if( non_feasible ) return;
+    solution = problem_type == ProblemType::Maximization ? get_maximization_solution() : get_minimization_solution();
+  }
+
+  std::vector<Fraction> Simplex::get_maximization_solution() const
+  {
+    assert( solved && problem_type == ProblemType::Maximization );
     std::vector<Fraction> return_vector {};
-    return_vector.resize( std::size( temp ), 0 );
-    for( auto i { 0 }; i < std::ssize( temp ); i++ )
+    const auto temp { matrix_representation.column( matrix_representation.row_size() - 1 ) };
+    return_vector.resize( variables_number, 0 );
+    for( auto i { 0 }; i < variables_number; i++ )
     {
-      auto temp_column { matrix_representation.column( i ) };
+      const auto temp_column { matrix_representation.column( i ) };
       auto index { -1 };
       auto all_zero { true };
       for( auto j { 0 }; j < std::ssize( temp_column ); ++j )
       {
         // Find 1 index and if all others are 0
         if( temp_column.at( j ) == 1 && index == -1 ) index = j;
-        else if( temp_column.at( j ) != 0 ) all_zero = false;
+        else if( temp_column.at( j ) != 0 )
+        {
+          all_zero = false;
+          break;
+        }
       }
       if( all_zero && index != -1 ) return_vector.at( i ) = temp.at( index );
     }
-
-    return_vector.emplace_back( *( temp.end() - 1 ) );
+    return_vector.at( return_vector.size() - 1 ) = temp.at( temp.size() - 1 );
     return return_vector;
+  }
+
+  std::vector<Fraction> Simplex::get_minimization_solution() const
+  {
+    assert( solved && problem_type == ProblemType::Minimization );
+    std::vector<Fraction> return_vector {};
+    const auto temp { matrix_representation.column( matrix_representation.row_size() - 1 ) };
+    return_vector.resize( variables_number, 0 );
+    for( long long i { constraints_number }, k { 0 }; i < constraints_number * 2; i++, k++ ) return_vector.at( k ) = matrix_representation.column( i ).at( matrix_representation.column_size() - 1 );
+    return_vector.at( return_vector.size() - 1 ) = temp.at( temp.size() - 1 );
+    return return_vector;
+  }
+
+  std::vector<Fraction> Simplex::get_solution() const
+  {
+    assert( solved );
+    if( non_feasible ) return { 0 };
+    return solution;
   }
 
   std::string Simplex::to_string() const
   {
     return matrix_representation.to_string();
+  }
+
+  std::vector<DMatrix<Fraction>> Simplex::get_steps() const
+  {
+    return steps;
   }
 
   bool Simplex::check_if_looping() const

@@ -1,89 +1,114 @@
 ﻿#include "y-simplex-method-solver.hpp"
+#include <strtk.hpp>
 
-int main()
+std::vector<yasuzume::math::Fraction> convert_string_to_fraction_vector( const std::string& );
+
+int main( int _argc, char* _argv[] )
 {
-  yasuzume::simplex::Simplex simplex_maximization_1 {};
-  simplex_maximization_1.set_function( { 40, 30, 1 } );
-  simplex_maximization_1.add_constraint( { 1, 1, 12 } );
-  simplex_maximization_1.add_constraint( { 2, 1, 16 } );
-  simplex_maximization_1.build( yasuzume::simplex::ProblemType::Maximization );
-  simplex_maximization_1.compute_solution();
+  /*
+   * First argument is a query, if the query is to:
+   * a) retrieve solution of maximization problem : -maxsol
+   * b) retrieve solution of minimization problem -minsol
+   * c) steps of maximization problem -maxsteps
+   * d) steps of minimization problem -minsteps, 
+  */
 
-  for( const auto& i : simplex_maximization_1.get_solution() )
+  // 2 argument is function formatted as "[x1, x2, ..., xn, z]"
+
+  // Following arguments are constraints formatted as "[x1, x2, ..., xn, c]"
+  const char* commands[ ] { "-help", "-maxsol", "-minsol", "-maxsteps", "-minsteps" };
+
+  if( _argc < 2 )
   {
-    std::cout << i << " ";
+    std::cerr << "Wrong number of arguments\n";
+    return 0;
   }
-  std::cout << "\n";
 
-  yasuzume::simplex::Simplex simplex_maximization_2 {};
-  simplex_maximization_2.set_function( { 1, 2, 3, 1 } );
-  simplex_maximization_2.add_constraint( { 1, 1, 1, 12 } );
-  simplex_maximization_2.add_constraint( { 2, 1, 3, 18 } );
-  simplex_maximization_2.build( yasuzume::simplex::ProblemType::Maximization );
-  simplex_maximization_2.compute_solution();
-
-  for( const auto& i : simplex_maximization_2.get_solution() ) std::cout << i << " ";
-  std::cout << "\n";
-
-  yasuzume::simplex::Simplex simplex_maximization_3 {};
-  simplex_maximization_3.set_function( { 1, 2, 1, 1 } );
-  simplex_maximization_3.add_constraint( { 1, 1, 3 } );
-  simplex_maximization_3.add_constraint( { 0, 1, 1, 4 } );
-  simplex_maximization_3.add_constraint( { 1, 0, 1, 5 } );
-  simplex_maximization_3.build( yasuzume::simplex::ProblemType::Maximization );
-  simplex_maximization_3.compute_solution();
-
-  for( const auto& i : simplex_maximization_3.get_solution() )
+  if( std::strcmp( _argv[ 1 ], commands[ 0 ] ) == 0 ) std::cout << "First argument is a query, if the query is to:\na) retrieve solution of maximization problem : -maxsol\nb) retrieve solution of minimization problem -minsol\nc) steps of maximization problem -maxsteps\nd) steps of minimization problem -minsteps\n2 argument is function formatted as \"x1, x2, ..., xn, z\"\nFollowing arguments are constraints formatted as \"x1, x2, ..., xn, c\"\n";
+  else if( std::strcmp( _argv[ 1 ], commands[ 1 ] ) == 0 )
   {
-    std::cout << i << " ";
+    if( _argc < 4 )
+    {
+      std::cerr << "Wrong number of arguments\n";
+      return 0;
+    }
+    yasuzume::simplex::Simplex simplex_method {};
+    simplex_method.set_function( convert_string_to_fraction_vector( _argv[ 2 ] ) );
+
+    for( auto i { 3 }; i < _argc; i++ ) simplex_method.add_constraint( convert_string_to_fraction_vector( _argv[ i ] ) );
+    simplex_method.build( yasuzume::simplex::ProblemType::Maximization );
+    simplex_method.compute_solution();
+    for( const auto sol = simplex_method.get_solution(); auto fraction : sol ) std::cout << fraction.to_string() << " ";
   }
-  std::cout << "\n";
-
-  yasuzume::simplex::Simplex simplex_minimization_1 {};
-  simplex_minimization_1.set_function( { 12, 16, 1 } );
-  simplex_minimization_1.add_constraint( { 1, 2, 40 } );
-  simplex_minimization_1.add_constraint( { 1, 1, 30 } );
-  simplex_minimization_1.build( yasuzume::simplex::ProblemType::Minimization );
-  simplex_minimization_1.compute_solution();
-
-  for( const auto& i : simplex_minimization_1.get_solution() )
+  else if( std::strcmp( _argv[ 1 ], commands[ 2 ] ) == 0 )
   {
-    std::cout << i << " ";
+    if( _argc < 4 )
+    {
+      std::cerr << "Wrong number of arguments\n";
+      return 0;
+    }
+    yasuzume::simplex::Simplex simplex_method {};
+    simplex_method.set_function( convert_string_to_fraction_vector( _argv[ 2 ] ) );
+
+    for( auto i { 3 }; i < _argc; i++ ) simplex_method.add_constraint( convert_string_to_fraction_vector( _argv[ i ] ) );
+    simplex_method.build( yasuzume::simplex::ProblemType::Minimization );
+    simplex_method.compute_solution();
+    for( const auto sol = simplex_method.get_solution(); auto fraction : sol ) std::cout << fraction.to_string() << " ";
   }
-  std::cout << "\n";
-
-  yasuzume::simplex::Simplex simplex_minimization_2 {};
-  simplex_minimization_2.set_function( { 6, 8, 1 } );
-  simplex_minimization_2.add_constraint( { 2, 3, 7 } );
-  simplex_minimization_2.add_constraint( { 4, 5, 9 } );
-  simplex_minimization_2.build( yasuzume::simplex::ProblemType::Minimization );
-  simplex_minimization_2.compute_solution();
-
-  for( const auto& i : simplex_minimization_2.get_solution() )
+  else if( std::strcmp( _argv[ 1 ], commands[ 3 ] ) == 0 )
   {
-    std::cout << i << " ";
+    if( _argc < 4 )
+    {
+      std::cerr << "Wrong number of arguments\n";
+      return 0;
+    }
+    yasuzume::simplex::Simplex simplex_method {};
+    simplex_method.set_function( convert_string_to_fraction_vector( _argv[ 2 ] ) );
+    for( auto i { 3 }; i < _argc; i++ ) simplex_method.add_constraint( convert_string_to_fraction_vector( _argv[ i ] ) );
+    simplex_method.build( yasuzume::simplex::ProblemType::Maximization );
+    simplex_method.compute_solution();
+    for( const auto& step : simplex_method.get_steps() ) std::cout << step.to_string() << "\n";
+    for( const auto sol = simplex_method.get_solution(); auto fraction : sol ) std::cout << fraction.to_string() << " ";
   }
-  std::cout << "\n";
-
-  yasuzume::simplex::Simplex simplex_minimization_3 {};
-  simplex_minimization_3.set_function( { 5, 6, 7, 1 } );
-  simplex_minimization_3.add_constraint( { 3, 2, 3, 10 } );
-  simplex_minimization_3.add_constraint( { 4, 3, 5, 12 } );
-  simplex_minimization_3.build( yasuzume::simplex::ProblemType::Minimization );
-  simplex_minimization_3.compute_solution();
-
-  for( const auto& i : simplex_minimization_3.get_solution() ) std::cout << i << " ";
-  std::cout << "\n";
-
-  yasuzume::simplex::Simplex simplex_minimization_4 {};
-  simplex_minimization_3.set_function( { 4, 3, 1 } );
-  simplex_minimization_3.add_constraint( { 1, 1, 10 } );
-  simplex_minimization_3.add_constraint( { 3, 2, 24 } );
-  simplex_minimization_3.build( yasuzume::simplex::ProblemType::Minimization );
-  simplex_minimization_3.compute_solution();
-
-  for( const auto& i : simplex_minimization_3.get_solution() ) std::cout << i << " ";
-  std::cout << "\n";
+  else if( std::strcmp( _argv[ 1 ], commands[ 4 ] ) == 0 )
+  {
+    if( _argc < 4 )
+    {
+      std::cerr << "Wrong number of arguments\n";
+      return 0;
+    }
+    yasuzume::simplex::Simplex simplex_method {};
+    simplex_method.set_function( convert_string_to_fraction_vector( _argv[ 2 ] ) );
+    for( auto i { 3 }; i < _argc; i++ ) simplex_method.add_constraint( convert_string_to_fraction_vector( _argv[ i ] ) );
+    simplex_method.build( yasuzume::simplex::ProblemType::Minimization );
+    simplex_method.compute_solution();
+    for( const auto& step : simplex_method.get_steps() ) std::cout << step.to_string() << "\n";
+    for( const auto sol = simplex_method.get_solution(); auto fraction : sol ) std::cout << fraction.to_string() << " ";
+  }
+  else std::cerr << "Invalid query, use -maxsol, -minsol, -maxsteps, -minsteps, -help\n";
 
   return 0;
+}
+
+std::vector<yasuzume::math::Fraction> convert_string_to_fraction_vector( const std::string& _input_string )
+{
+  std::vector<yasuzume::math::Fraction>                            return_vector {};
+  strtk::std_string::token_list_type                               split_input;
+  std::vector<std::string>                                         split_vector {};
+  const strtk::single_delimiter_predicate predicate( ',' );
+  split( predicate, _input_string, std::back_inserter( split_input ), strtk::split_options::compress_delimiters );
+  for( const auto& key : split_input | std::views::keys ) split_vector.emplace_back( key );
+  for( auto& i : split_vector )
+  {
+    if( i.contains( "/" ) )
+    {
+      strtk::std_string::token_list_type split_number {};
+      std::vector<std::string>           number_vector {};
+      for( const auto& key : split_input | std::views::keys ) split_vector.emplace_back( key );
+      split( predicate, i, std::back_inserter( split_number ), strtk::split_options::compress_delimiters );
+      return_vector.emplace_back( std::stoi( number_vector.at( 0 ) ), std::stoi( number_vector.at( 1 ) ) );
+    }
+    else return_vector.emplace_back( std::stoi( i ) );
+  }
+  return return_vector;
 }

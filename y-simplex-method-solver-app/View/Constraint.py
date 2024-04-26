@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
 from .NumberLineEdit import NumberLineEdit
 from .VariableInputView import VariableInputView
+from Model import ProblemType
 
 
 class Constraint(QWidget):
@@ -9,11 +10,17 @@ class Constraint(QWidget):
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
         self.equals = NumberLineEdit()
-        self.eq_label = QLabel(" = ")
+        self.eq_label = QLabel(" > ")
         self.layout.addWidget(self.equals)
         self.layout.addWidget(self.eq_label)
         self.vars = []
         self.synchronize_variables(var_no)
+
+    def set_problem(self, problem: ProblemType):
+        if problem is ProblemType.Maximization:
+            self.eq_label.setText(" > ")
+        elif problem is ProblemType.Minimization:
+            self.eq_label.setText(" < ")
 
     def synchronize_variables(self, var_no: int):
         if var_no < len(self.vars):
@@ -26,3 +33,10 @@ class Constraint(QWidget):
                 self.vars.append(VariableInputView(i))
             for i in range(old_len, len(self.vars)):
                 self.layout.addWidget(self.vars[i])
+
+    def get_variables_string(self):
+        return_string = ""
+        for i in self.vars:
+            return_string += i.get_value() + ", "
+        return_string += self.equals.get_value()
+        return return_string

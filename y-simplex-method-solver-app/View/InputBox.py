@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QScrollArea, QLabel, QVBoxLayout, QSizePolicy, QWidg
 from PyQt6.QtCore import Qt
 from .Function import Function
 from .Constraint import Constraint
+from Model import ProblemType
 
 
 class InputBox(QScrollArea):
@@ -25,6 +26,17 @@ class InputBox(QScrollArea):
         self.widget.setLayout(self.layout)
         self.set_constraints(2)
 
+    def set_problem(self, problem: ProblemType):
+        for constraint in self.constraints:
+            constraint.set_problem(problem)
+        self.function.set_problem(problem)
+
+    def set_problem_int(self, problem_int: int):
+        if problem_int == 0:
+            self.set_problem(ProblemType.Maximization)
+        elif problem_int == 1:
+            self.set_problem(ProblemType.Minimization)
+
     def synchronize_variables(self, var_no: int):
         self.var_no = var_no
         for constraint in self.constraints:
@@ -42,3 +54,9 @@ class InputBox(QScrollArea):
                 self.constraints.append(Constraint(self.var_no))
             for i in range(old_len, len(self.constraints)):
                 self.layout.addWidget(self.constraints[i])
+
+    def get_all_variables(self):
+        strings = [self.function.get_variables_string()]
+        for constraint in self.constraints:
+            strings.append(constraint.get_variables_string())
+        return strings

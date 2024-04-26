@@ -1,7 +1,6 @@
 #pragma once
 
 #include <DMatrix.inl>
-
 #include <vector>
 
 #include <Fraction.hpp>
@@ -25,16 +24,22 @@ namespace yasuzume::simplex
 
     void add_constraint( std::initializer_list<Fraction> );
     void set_function( std::initializer_list<Fraction> );
+    void add_constraint( std::vector<Fraction> );
+    void set_function( const std::vector<Fraction>& );
 
     void build( ProblemType );
     void next();
     void compute_solution();
+    void cache_solution();
 
     [[nodiscard]] std::vector<Fraction> get_solution() const;
     [[nodiscard]] std::string           to_string() const;
-
+    [[nodiscard]] std::vector<DMatrix<Fraction>> get_steps() const;
 
   private:
+    [[nodiscard]] std::vector<Fraction> get_maximization_solution() const;
+    [[nodiscard]] std::vector<Fraction> get_minimization_solution() const;
+
     DMatrix<Fraction> matrix_representation {};
 
     std::vector<DMatrix<Fraction>> steps {};
@@ -48,5 +53,9 @@ namespace yasuzume::simplex
     bool built { false };
     bool solved { false };
     bool non_feasible { false };
+    long long variables_number { 0 };
+    long long constraints_number { 0 };
+    ProblemType problem_type;
+    std::vector<Fraction> solution {};
   };
 }
