@@ -15,6 +15,7 @@ class MenuBar(QMenuBar):
         export_menu = file_menu.addMenu("&Export")
         export_menu.addAction("&To Word")
         export_menu.addAction("&To PDF")
+        self.to_html_action = export_menu.addAction("&To HTML")
         edit_menu.addAction("&Undo")
         edit_menu.addAction("&Redo")
         help_menu.addAction("Instruction")

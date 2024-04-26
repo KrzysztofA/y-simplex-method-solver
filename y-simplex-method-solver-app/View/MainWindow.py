@@ -1,5 +1,5 @@
 import os
-from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel, QGridLayout, QSpinBox, QPushButton, QComboBox
+from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel, QGridLayout, QSpinBox, QPushButton, QComboBox, QMenuBar
 
 from dotenv import load_dotenv
 from View.MenuBar import MenuBar
@@ -49,7 +49,8 @@ class MainWindow(QMainWindow):
         self.compute_button = QPushButton("Compute")
         self.layout.addWidget(self.compute_button, 1, 5)
 
-        self.setMenuBar(MenuBar())
+        self.menu_bar = MenuBar()
+        self.setMenuBar(self.menu_bar)
         self.show()
 
     def set_problem(self, problem: int):

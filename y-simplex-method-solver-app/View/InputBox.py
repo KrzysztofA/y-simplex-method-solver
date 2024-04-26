@@ -60,3 +60,10 @@ class InputBox(QScrollArea):
         for constraint in self.constraints:
             strings.append(constraint.get_variables_string())
         return strings
+
+    def get_function(self):
+        return self.function.get_variables_string()
+
+    def get_constraints(self):
+        return [a.get_variables_string() for a in self.constraints]
+
