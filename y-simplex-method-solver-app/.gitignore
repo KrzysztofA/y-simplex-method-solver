@@ -290,3 +290,6 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm
 
 /.idea
+
+y-simplex-method-solver-executable.exe
+y-simplex-method-solver.dll

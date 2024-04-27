@@ -1,2 +1,0 @@
-class ToWordConverter:
-    pass

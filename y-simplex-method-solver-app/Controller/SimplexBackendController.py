@@ -5,6 +5,7 @@ import subprocess
 class SimplexBackendController:
     def __init__(self):
         self.problem_type: ProblemType = ProblemType.Maximization
+        self.collect_steps: bool = False
         self.values: [] = []
 
     def set_problem(self, problem):
@@ -14,6 +15,9 @@ class SimplexBackendController:
         self.values = values
 
     def collect_values(self):
-        arg0 = "-maxsol" if self.problem_type == ProblemType.Maximization else "-minsol"
+        if self.collect_steps:
+            arg0 = "-maxsteps" if self.problem_type == ProblemType.Maximization else "-minsteps"
+        else:
+            arg0 = "-maxsol" if self.problem_type == ProblemType.Maximization else "-minsol"
         result = subprocess.run(["y-simplex-method-solver-executable.exe", arg0] + self.values, shell=True, capture_output=True, text=True)
         return result.stdout

@@ -1,3 +1,6 @@
+from Model import ResultStruct
+
+
 class IOParser:
     @staticmethod
     def i_parse_to_str(input_arr: []):
@@ -15,9 +18,14 @@ class IOParser:
         return return_arr
 
     @staticmethod
-    def o_parse_to_arr(input_str: str):
-        input_str = input_str.strip()
-        return_arr = input_str.split(' ')
-        return_arr.insert(0, return_arr[-1])
-        return_arr.pop(-1)
-        return return_arr
+    def o_parse_results(input_str: str):
+        result = ResultStruct([], [])
+        if "[" in input_str:
+            arr = input_str.split("\n\n")
+            result.steps = [[[c for c in b.split() if c != "[" and c != "]" and c != " "] for b in a.splitlines()] for a in arr[:-1]]
+            result.solution = arr[-1].split()
+        else:
+            result.solution = input_str.split()
+        result.solution.insert(0, result.solution[-1])
+        result.solution.pop(-1)
+        return result

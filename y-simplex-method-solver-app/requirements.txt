@@ -1,2 +1,4 @@
-PyQt6~=6.6.1
+PyQt6~=6.7.0
 python-dotenv~=1.0.1
+pypandoc_binary~=1.13
+pypandoc~=1.13
