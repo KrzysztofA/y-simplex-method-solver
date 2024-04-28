@@ -2,5 +2,5 @@ from enum import Enum
 
 
 class ProblemType(Enum):
-    Maximization = 0,
-    Minimization = 1
+    Maximization: int = 0
+    Minimization: int = 1

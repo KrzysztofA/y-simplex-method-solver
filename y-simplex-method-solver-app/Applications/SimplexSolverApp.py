@@ -4,8 +4,8 @@ from Controller.SettingsController import SettingsController
 from View import MainWindow, SettingsDialogue
 from PyQt6.QtWidgets import QApplication
 from Controller import SimplexBackendController, ToPDFConverter
-from Controller import IOParser, ToDocumentConverter, ToHTMLConverter
-from Model import FullSolutionStruct, ResultStruct
+from Controller import IOParser, ToDocumentConverter, ToHTMLConverter, SaveLoadController
+from Model import FullSolutionStruct, ResultStruct, InputStruct, ProblemType
 
 import sys
 import os
@@ -42,13 +42,14 @@ class SimplexSolverApp:
         self.app = QApplication(sys.argv)
 
         # Variables
-        self.last_solution = FullSolutionStruct([], [], ResultStruct([], [], []))
+        self.last_solution = FullSolutionStruct("", {0: ""}, ResultStruct("", {0: ""}, {0: ""}))
 
         # Controller
         self.simplex_backend = SimplexBackendController()
         self.html_converter = ToHTMLConverter()
         self.doc_converter = ToDocumentConverter()
         self.pdf_converter = ToPDFConverter()
+        self.save_load_controller = SaveLoadController()
 
         self.settings_controller = SettingsController()
 
@@ -62,6 +63,8 @@ class SimplexSolverApp:
         self.main_window.menu_bar.to_doc_action.triggered.connect(self.save_to_document_file)
         self.main_window.menu_bar.to_pdf_action.triggered.connect(self.save_to_pdf_file)
         self.main_window.menu_bar.settings_action.triggered.connect(self.settings_dialogue.exec)
+        self.main_window.menu_bar.save_action.triggered.connect(self.save_file)
+        self.main_window.menu_bar.load_action.triggered.connect(self.load_file)
 
         # App Call
         self.app.exec()
@@ -73,11 +76,11 @@ class SimplexSolverApp:
         self.simplex_backend.collect_steps = True
         result_raw = self.simplex_backend.collect_values()
         self.last_solution.result = IOParser.o_parse_results(result_raw)
-        self.main_window.output_box.set_result(self.last_solution.result.solution)
+        self.main_window.output_box.set_result(self.last_solution.result.solution.split())
         self.last_solution.constraint_no = self.main_window.constraint_number.value()
         self.last_solution.variable_no = self.main_window.variable_number.value()
-        self.last_solution.function = self.main_window.input_box.get_function().split(",")
-        self.last_solution.constraints = self.main_window.input_box.get_constraints()
+        self.last_solution.function = self.main_window.input_box.get_function()
+        self.last_solution.constraints = {a[0]: a[1] for a in enumerate(self.main_window.input_box.get_constraints())}
 
     @custom_export_factory(file_extensions="HTML Files (*.html)")
     def save_to_html_file(self, directory):
@@ -92,6 +95,42 @@ class SimplexSolverApp:
     def save_to_pdf_file(self, directory):
         self.pdf_converter.set_lines(self.html_converter.convert())
         self.pdf_converter.save_as_pdf(directory)
+
+    def save_file(self):
+        dir_ = QFileDialog.getSaveFileName(None, 'Select a folder:', f'{self.settings_controller.default_save_path}',
+                                           "Simplex Solver File (*.yse)")
+        if dir_ is not None and dir_[0] != "":
+
+            # Collect Input
+            input_part = InputStruct(
+                self.main_window.input_box.get_function(),
+                {a[0]: a[1] for a in enumerate(self.main_window.input_box.get_constraints())},
+                self.main_window.problem,
+                self.main_window.variable_number.value(),
+                self.main_window.constraint_number.value()
+            )
+
+            # Collect Output
+            output_part = self.last_solution
+
+            self.save_load_controller.set_input_data(input_part)
+            self.save_load_controller.set_output_data(output_part)
+            self.save_load_controller.save(dir_[0])
+
+    def load_file(self):
+        dir_ = QFileDialog.getOpenFileName(None, 'Select a file:',
+                                           f'{self.settings_controller.settings.default_save_dir}',
+                                           "Simplex Solver File (*.yse)")
+        if dir_ is not None and dir_[0] != "":
+            loaded_file = self.save_load_controller.load(dir_[0])
+            loaded_file.output.problem = loaded_file.output.problem
+            self.last_solution = loaded_file.output
+            self.main_window.variable_number.setValue(loaded_file.input.variable_no)
+            self.main_window.constraint_number.setValue(loaded_file.input.constraint_no)
+            self.main_window.problem_type.setCurrentIndex(0 if loaded_file.input.problem == ProblemType.Maximization else 1)
+            self.main_window.input_box.set_function(loaded_file.input.function_input)
+            self.main_window.input_box.set_constraints_values(loaded_file.input.constraints)
+            self.main_window.output_box.set_result(self.last_solution.result.solution.split())
 
 
 if __name__ == '__main__':

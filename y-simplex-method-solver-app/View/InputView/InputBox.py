@@ -3,6 +3,7 @@ from PyQt6.QtCore import Qt
 from .Function import Function
 from .Constraint import Constraint
 from Model import ProblemType
+from typing import Dict
 
 
 class InputBox(QScrollArea):
@@ -67,3 +68,9 @@ class InputBox(QScrollArea):
     def get_constraints(self):
         return [a.get_variables_string() for a in self.constraints]
 
+    def set_function(self, function_string: str):
+        self.function.set_variables_from_string(function_string)
+
+    def set_constraints_values(self, constraints: Dict[int, str]):
+        for i in range(0, len(self.constraints)):
+            self.constraints[i].set_values_from_string(constraints[i])

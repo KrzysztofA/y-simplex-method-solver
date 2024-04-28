@@ -19,15 +19,16 @@ class IOParser:
 
     @staticmethod
     def o_parse_results(input_str: str):
-        result = ResultStruct([], [], [])
+        result = ResultStruct("", {}, {})
 
         if "[" in input_str:
             arr = input_str.split("\n\n")
-            result.steps = [[[c for c in b.split() if c != "[" and c != "]" and c != " "] for b in a.splitlines()] for a in arr[:-2]]
-            result.operations = [[b for b in a.split("\n")] for a in arr[-2].strip("{").strip("}").split("}\n{")]
+            result.steps = {a[0]: {b[0]: {c[0]: c[1] for c in enumerate(b[1].split()) if c[1] != "[" and c[1] != "]" and c[1] != " "} for b in enumerate(a[1].splitlines())} for a in enumerate(arr[:-2])}
+            result.operations = {a[0]: {b[0]: b[1] for b in enumerate(a[1].split("\n"))} for a in enumerate(arr[-2].strip("{").strip("}").split("}\n{"))}
             result.solution = arr[-1].split()
         else:
             result.solution = input_str.split()
         result.solution.insert(0, result.solution[-1])
         result.solution.pop(-1)
+        result.solution = " ".join(result.solution)
         return result

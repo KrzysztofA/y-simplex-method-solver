@@ -37,3 +37,8 @@ class Function(QWidget):
             return_string += i.get_value() + ", "
         return_string += "1"
         return return_string
+
+    def set_variables_from_string(self, function_string: str):
+        function = function_string.split(",")
+        for i in range(0, len(self.vars)):
+            self.vars[i].set_value(function[i])

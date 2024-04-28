@@ -7,5 +7,6 @@ from .FullSolutionStruct import FullSolutionStruct
 @dataclass_json
 @dataclass
 class SimplexFile:
+    filename: str
     input: InputStruct
     output: FullSolutionStruct

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 import re
 
 from Model import ProblemType
@@ -17,22 +17,25 @@ class ToHTMLConverter:
         self.variable_no: int = 0
         self.constraints_no: int = 0
 
-    def set_equation(self, equation: List[str]):
-        self.equation = [a.strip() for a in equation]
+    def set_equation(self, equation: str):
+        self.equation = [a.strip() for a in equation.split()]
 
-    def set_constraints(self, constraints: List[str]):
+    def set_constraints(self, constraints: Dict[int, str]):
+        constraints = [v for k, v in sorted(constraints.items(), key=lambda pair: pair[0])]
         self.constraints = constraints
 
-    def set_steps(self, steps: List[str]):
+    def set_steps(self, steps: Dict[int, Dict[int, Dict[int, str]]]):
+        steps = [[[bv for bk, bv in sorted(av.items(), key=lambda pair: pair[0])] for ak, av in sorted(v.items(), key=lambda pair: pair[0])] for k, v in sorted(steps.items(), key=lambda pair: pair[0])]
         self.steps = steps
 
-    def set_solution(self, solution: List[str]):
-        self.solution = [a.strip() for a in solution]
+    def set_solution(self, solution: str):
+        self.solution = [a.strip() for a in solution.split()]
 
     def set_problem(self, problem_type: ProblemType):
         self.problem_type = problem_type
 
-    def set_operations(self, operations: List[str]):
+    def set_operations(self, operations: Dict[int, Dict[int, str]]):
+        operations = [[av for ak, av in sorted(v.items(), key=lambda pair: pair[0])] for k, v in sorted(operations.items(), key=lambda pair: pair[0])]
         self.operations = operations
 
     def set_variable_no(self, variable_no: int):

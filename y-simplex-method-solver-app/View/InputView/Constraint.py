@@ -40,3 +40,9 @@ class Constraint(QWidget):
             return_string += i.get_value() + ", "
         return_string += self.equals.get_value()
         return return_string
+
+    def set_values_from_string(self, constraint_string: str):
+        constraint = constraint_string.split(",")
+        self.equals.set_value(constraint[-1])
+        for i in range(0, len(self.vars)):
+            self.vars[i].set_value(constraint[i])
