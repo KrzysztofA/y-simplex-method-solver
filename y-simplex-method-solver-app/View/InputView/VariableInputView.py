@@ -14,3 +14,7 @@ class VariableInputView(QWidget):
 
     def get_value(self):
         return self.variable_edit.get_value()
+
+    def set_value(self, value):
+        self.variable_edit.set_value(value)
+        

@@ -2,9 +2,9 @@ import os
 from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel, QGridLayout, QSpinBox, QPushButton, QComboBox, QMenuBar
 
 from dotenv import load_dotenv
-from View.MenuBar import MenuBar
-from View.InputBox import InputBox
-from .OutputBox import OutputBox
+from View.MainView import MenuBar
+from View.InputView import InputBox
+from View.OutputView import OutputBox
 from Model.ProblemType import ProblemType
 
 

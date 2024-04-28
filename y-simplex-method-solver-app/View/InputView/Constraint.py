@@ -10,7 +10,7 @@ class Constraint(QWidget):
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
         self.equals = NumberLineEdit()
-        self.eq_label = QLabel(" > ")
+        self.eq_label = QLabel(" \u2265 ")
         self.layout.addWidget(self.equals)
         self.layout.addWidget(self.eq_label)
         self.vars = []
@@ -18,9 +18,9 @@ class Constraint(QWidget):
 
     def set_problem(self, problem: ProblemType):
         if problem is ProblemType.Maximization:
-            self.eq_label.setText(" > ")
+            self.eq_label.setText(" \u2265 ")
         elif problem is ProblemType.Minimization:
-            self.eq_label.setText(" < ")
+            self.eq_label.setText(" \u2264 ")
 
     def synchronize_variables(self, var_no: int):
         if var_no < len(self.vars):

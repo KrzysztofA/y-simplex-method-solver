@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout
 from PyQt6.QtCore import Qt
-from View.VariableOutputView import VariableOutputView
+from .VariableOutputView import VariableOutputView
 
 
 class OutputBox(QScrollArea):

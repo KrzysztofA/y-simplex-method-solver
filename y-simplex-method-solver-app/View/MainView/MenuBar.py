@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QMenuBar
+from PyQt6.QtGui import QIcon
 
 
 class MenuBar(QMenuBar):
@@ -10,16 +11,17 @@ class MenuBar(QMenuBar):
         help_menu = self.addMenu("&Help")
         file_menu.addAction("&New")
         file_menu.addAction("&Save")
+        file_menu.addAction("&Save As")
         file_menu.addAction("Load")
         file_menu.addSeparator()
         export_menu = file_menu.addMenu("&Export")
-        self.to_doc_action = export_menu.addAction("&To Document")
+        self.to_doc_action = export_menu.addAction(QIcon(), "&To Document")
         self.to_pdf_action = export_menu.addAction("&To PDF")
         self.to_html_action = export_menu.addAction("&To HTML")
         edit_menu.addAction("&Undo")
         edit_menu.addAction("&Redo")
         edit_menu.addSeparator()
-        edit_menu.addAction("&Settings")
+        self.settings_action = edit_menu.addAction("&Settings")
         help_menu.addAction("Instruction")
         help_menu.addSeparator()
         help_menu.addAction("About")

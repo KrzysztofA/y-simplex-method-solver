@@ -14,3 +14,6 @@ class NumberLineEdit(QLineEdit):
 
     def get_value(self):
         return super().text()
+
+    def set_value(self, value):
+        super().setText(value)

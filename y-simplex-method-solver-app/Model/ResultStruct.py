@@ -5,3 +5,4 @@ from dataclasses import dataclass
 class ResultStruct:
     solution: []
     steps: []
+    operations: []

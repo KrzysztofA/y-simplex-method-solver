@@ -1,9 +1,11 @@
 from dataclasses import dataclass
+from dataclasses_json import dataclass_json
 
 
+@dataclass_json
 @dataclass
 class Settings:
-    compute_steps: bool = False
-    default_save_dir = "C://"
-    default_save_name = "New Simplex Solution"
-
+    compute_steps: bool = True
+    default_save_dir: str = "C://"
+    use_last_save_dir: bool = False
+    default_save_name: str = "New Simplex Solution"

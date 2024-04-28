@@ -16,7 +16,7 @@ int main( int _argc, char* _argv[] )
   // 2 argument is function formatted as "[x1, x2, ..., xn, z]"
 
   // Following arguments are constraints formatted as "[x1, x2, ..., xn, c]"
-  const char* commands[ ] { "-help", "-maxsol", "-minsol", "-maxsteps", "-minsteps" };
+  const char* commands[ ] { "-help", "-maxsol", "-minsol", "-maxsteps", "-minsteps", "-maxsteps-ope", "-minsteps-ope" };
 
   if( _argc < 2 )
   {
@@ -24,7 +24,7 @@ int main( int _argc, char* _argv[] )
     return 0;
   }
 
-  if( std::strcmp( _argv[ 1 ], commands[ 0 ] ) == 0 ) std::cout << "First argument is a query, if the query is to:\na) retrieve solution of maximization problem : -maxsol\nb) retrieve solution of minimization problem -minsol\nc) steps of maximization problem -maxsteps\nd) steps of minimization problem -minsteps\n2 argument is function formatted as \"x1, x2, ..., xn, z\"\nFollowing arguments are constraints formatted as \"x1, x2, ..., xn, c\"\n";
+  if( std::strcmp( _argv[ 1 ], commands[ 0 ] ) == 0 ) std::cout << "First argument is a query, if the query is to:\na) retrieve solution of maximization problem : -maxsol\nb) retrieve solution of minimization problem -minsol\nc) steps of maximization problem -maxsteps\nd) steps of minimization problem -minsteps\ne) steps of maximization problem with operations written -maxsteps-ope\nf) steps of minimization problem with operations written -minsteps-ope\n2 argument is function formatted as \"x1, x2, ..., xn, z\"\nFollowing arguments are constraints formatted as \"x1, x2, ..., xn, c\"\n";
   else if( std::strcmp( _argv[ 1 ], commands[ 1 ] ) == 0 )
   {
     if( _argc < 4 )
@@ -63,6 +63,7 @@ int main( int _argc, char* _argv[] )
       return 0;
     }
     yasuzume::simplex::Simplex simplex_method {};
+    simplex_method.set_cache_steps( true );
     simplex_method.set_function( convert_string_to_fraction_vector( _argv[ 2 ] ) );
     for( auto i { 3 }; i < _argc; i++ ) simplex_method.add_constraint( convert_string_to_fraction_vector( _argv[ i ] ) );
     simplex_method.build( yasuzume::simplex::ProblemType::Maximization );
@@ -78,6 +79,7 @@ int main( int _argc, char* _argv[] )
       return 0;
     }
     yasuzume::simplex::Simplex simplex_method {};
+    simplex_method.set_cache_steps( true );
     simplex_method.set_function( convert_string_to_fraction_vector( _argv[ 2 ] ) );
     for( auto i { 3 }; i < _argc; i++ ) simplex_method.add_constraint( convert_string_to_fraction_vector( _argv[ i ] ) );
     simplex_method.build( yasuzume::simplex::ProblemType::Minimization );
@@ -85,7 +87,45 @@ int main( int _argc, char* _argv[] )
     for( const auto& step : simplex_method.get_steps() ) std::cout << step.to_string() << "\n";
     for( const auto sol = simplex_method.get_solution(); auto fraction : sol ) std::cout << fraction.to_string() << " ";
   }
-  else std::cerr << "Invalid query, use -maxsol, -minsol, -maxsteps, -minsteps, -help\n";
+  else if( std::strcmp( _argv[ 1 ], commands[ 5 ] ) == 0 )
+  {
+    if( _argc < 4 )
+    {
+      std::cerr << "Wrong number of arguments\n";
+      return 0;
+    }
+    yasuzume::simplex::Simplex simplex_method {};
+    simplex_method.set_cache_steps( true );
+    simplex_method.set_cache_operation_text( true );
+    simplex_method.set_function( convert_string_to_fraction_vector( _argv[ 2 ] ) );
+    for( auto i { 3 }; i < _argc; i++ ) simplex_method.add_constraint( convert_string_to_fraction_vector( _argv[ i ] ) );
+    simplex_method.build( yasuzume::simplex::ProblemType::Maximization );
+    simplex_method.compute_solution();
+    for( const auto& step : simplex_method.get_steps() ) std::cout << step.to_string() << "\n";
+    for( const auto& step : simplex_method.get_steps_operation_text() ) std::cout << step << "\n";
+    std::cout << "\n";
+    for( const auto sol = simplex_method.get_solution(); auto fraction : sol ) std::cout << fraction.to_string() << " ";
+  }
+  else if( std::strcmp( _argv[ 1 ], commands[ 6 ] ) == 0 )
+  {
+    if( _argc < 4 )
+    {
+      std::cerr << "Wrong number of arguments\n";
+      return 0;
+    }
+    yasuzume::simplex::Simplex simplex_method {};
+    simplex_method.set_cache_steps( true );
+    simplex_method.set_cache_operation_text( true );
+    simplex_method.set_function( convert_string_to_fraction_vector( _argv[ 2 ] ) );
+    for( auto i { 3 }; i < _argc; i++ ) simplex_method.add_constraint( convert_string_to_fraction_vector( _argv[ i ] ) );
+    simplex_method.build( yasuzume::simplex::ProblemType::Minimization );
+    simplex_method.compute_solution();
+    for( const auto& step : simplex_method.get_steps() ) std::cout << step.to_string() << "\n";
+    for( const auto& step : simplex_method.get_steps_operation_text() ) std::cout << step << "\n";
+    std::cout << "\n";
+    for( const auto sol = simplex_method.get_solution(); auto fraction : sol ) std::cout << fraction.to_string() << " ";
+  }
+  else std::cerr << "Invalid query, use -maxsol, -minsol, -maxsteps, -minsteps, -maxsteps-ope, -minsteps-ope, -help\n";
 
   return 0;
 }

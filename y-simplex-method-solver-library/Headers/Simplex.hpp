@@ -32,9 +32,13 @@ namespace yasuzume::simplex
     void compute_solution();
     void cache_solution();
 
+    void set_cache_steps( const bool& );
+    void set_cache_operation_text( const bool& );
+
     [[nodiscard]] std::vector<Fraction> get_solution() const;
     [[nodiscard]] std::string           to_string() const;
     [[nodiscard]] std::vector<DMatrix<Fraction>> get_steps() const;
+    [[nodiscard]] std::vector<std::string> get_steps_operation_text() const;
 
   private:
     [[nodiscard]] std::vector<Fraction> get_maximization_solution() const;
@@ -43,6 +47,7 @@ namespace yasuzume::simplex
     DMatrix<Fraction> matrix_representation {};
 
     std::vector<DMatrix<Fraction>> steps {};
+    std::vector<std::string> operations {};
 
     std::vector<Fraction> result_column {};
     std::vector<Fraction> function {};
@@ -53,6 +58,9 @@ namespace yasuzume::simplex
     bool built { false };
     bool solved { false };
     bool non_feasible { false };
+
+    bool cache_steps { false };
+    bool cache_operation_text { false };
     long long variables_number { 0 };
     long long constraints_number { 0 };
     ProblemType problem_type;

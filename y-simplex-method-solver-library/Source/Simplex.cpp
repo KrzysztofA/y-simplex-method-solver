@@ -2,6 +2,7 @@
 #include <Simplex.hpp>
 
 #include <Enumerator.inl>
+#include <sstream>
 #include <string>
 
 namespace yasuzume::simplex
@@ -73,7 +74,9 @@ namespace yasuzume::simplex
   {
     assert( built );
     if( non_feasible ) return;
-    steps.emplace_back( matrix_representation );
+    if( cache_steps ) steps.emplace_back( matrix_representation );
+
+    std::stringstream string_stream {};
 
     // Identify most negative entry in the bottom row
 
@@ -98,16 +101,23 @@ namespace yasuzume::simplex
     // Apply row operation
 
     // Make pivot entry 1
+    if( cache_operation_text ) string_stream << "{\nRow" << pivot_y + 1 << " = " << "Row" << pivot_y + 1 << "/(" << matrix_representation.at( pivot_x, pivot_y ) << ")\n";
     matrix_representation.row_operation_scale( pivot_y, Divide, matrix_representation.at( pivot_x, pivot_y ) );
+
 
     // Subtract pivot row from all other rows to get 0 in columns but pivot
     for( size_t x { 0 }; x < matrix_representation.column_size(); x++ )
     {
       if( x == pivot_y ) continue;
+      if( cache_operation_text ) string_stream << "Row" << x + 1 << " = " << "Row" << x + 1 << " - " << "Row" << pivot_y + 1 << " * " << matrix_representation.at( pivot_x, x ) << "\n";
       matrix_representation.row_operation( x, Subtract, pivot_y, matrix_representation.at( pivot_x, x ) );
     }
 
-    // std::cout << "\n" << matrix_representation.to_string() << "\n";
+    if( cache_operation_text )
+    {
+      string_stream << "}";
+      operations.emplace_back( string_stream.str() );
+    }
 
     // Check if constrains are satisfied
     solved = check_if_solved();
@@ -123,7 +133,7 @@ namespace yasuzume::simplex
       next();
       if( non_feasible ) return;
     }
-    steps.emplace_back( matrix_representation );
+    if( cache_steps ) steps.emplace_back( matrix_representation );
     cache_solution();
   }
 
@@ -132,6 +142,16 @@ namespace yasuzume::simplex
     assert( solved );
     if( non_feasible ) return;
     solution = problem_type == ProblemType::Maximization ? get_maximization_solution() : get_minimization_solution();
+  }
+
+  void Simplex::set_cache_steps( const bool& _cache_steps )
+  {
+    cache_steps = _cache_steps;
+  }
+
+  void Simplex::set_cache_operation_text( const bool& _cache_operation_text )
+  {
+    cache_operation_text = _cache_operation_text;
   }
 
   std::vector<Fraction> Simplex::get_maximization_solution() const
@@ -187,6 +207,11 @@ namespace yasuzume::simplex
   std::vector<DMatrix<Fraction>> Simplex::get_steps() const
   {
     return steps;
+  }
+
+  std::vector<std::string> Simplex::get_steps_operation_text() const
+  {
+    return operations;
   }
 
   bool Simplex::check_if_looping() const

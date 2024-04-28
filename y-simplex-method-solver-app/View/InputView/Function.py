@@ -7,7 +7,7 @@ class Function(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QHBoxLayout()
-        self.z_label = QLabel("Z < ")
+        self.z_label = QLabel("Z \u2264 ")
         self.layout.addWidget(self.z_label)
         self.setLayout(self.layout)
         self.vars  = []
@@ -15,9 +15,9 @@ class Function(QWidget):
 
     def set_problem(self, problem: ProblemType):
         if problem is ProblemType.Maximization:
-            self.z_label.setText( "Z < " )
+            self.z_label.setText( "Z \u2264 " )
         elif problem is ProblemType.Minimization:
-            self.z_label.setText( "Z > " )
+            self.z_label.setText( "Z \u2265 " )
 
     def synchronize_variables(self, var_no: int):
         if var_no < len(self.vars):

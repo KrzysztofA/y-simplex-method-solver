@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QFileDialog
 
-from View.MainWindow import MainWindow
+from Controller.SettingsController import SettingsController
+from View import MainWindow, SettingsDialogue
 from PyQt6.QtWidgets import QApplication
 from Controller import SimplexBackendController, ToPDFConverter
 from Controller import IOParser, ToDocumentConverter, ToHTMLConverter
@@ -10,13 +11,38 @@ import sys
 import os
 
 
+def custom_export_factory(file_extensions):
+    def custom_export(function):
+        def wrapper(*args, **kwargs):
+            dir_ = QFileDialog.getSaveFileName(None, 'Select a folder:',
+                                               f'{args[0].settings_controller.default_save_path}', file_extensions)
+            if dir_ is not None and dir_[0] != "":
+                args[0].html_converter.set_problem(args[0].last_solution.problem)
+                args[0].html_converter.set_constraints(args[0].last_solution.constraints)
+                args[0].html_converter.set_equation(args[0].last_solution.function)
+                if len(args[0].last_solution.result.solution) != 0:
+                    args[0].html_converter.set_solution(args[0].last_solution.result.solution)
+                if len(args[0].last_solution.result.steps) != 0:
+                    args[0].html_converter.set_steps(args[0].last_solution.result.steps)
+                    args[0].html_converter.set_variable_no(args[0].last_solution.variable_no)
+                    args[0].html_converter.set_constraints_no(args[0].last_solution.constraint_no)
+                    args[0].html_converter.set_operations(args[0].last_solution.result.operations)
+                kwargs["directory"] = dir_[0]
+                function(args[0], **kwargs)
+                args[0].settings_controller.auto_set_default_save_path(dir_[0])
+
+        return wrapper
+
+    return custom_export
+
+
 class SimplexSolverApp:
     def __init__(self):
         # Entry point needs to be QApplication
         self.app = QApplication(sys.argv)
 
         # Variables
-        self.last_solution = FullSolutionStruct([], [], ResultStruct([], []))
+        self.last_solution = FullSolutionStruct([], [], ResultStruct([], [], []))
 
         # Controller
         self.simplex_backend = SimplexBackendController()
@@ -24,14 +50,18 @@ class SimplexSolverApp:
         self.doc_converter = ToDocumentConverter()
         self.pdf_converter = ToPDFConverter()
 
+        self.settings_controller = SettingsController()
+
         # View
         self.main_window = MainWindow()
+        self.settings_dialogue = SettingsDialogue(self.settings_controller)
 
         # Stream from View To Controller
         self.main_window.compute_button.clicked.connect(self.compute_simplex)
         self.main_window.menu_bar.to_html_action.triggered.connect(self.save_to_html_file)
         self.main_window.menu_bar.to_doc_action.triggered.connect(self.save_to_document_file)
         self.main_window.menu_bar.to_pdf_action.triggered.connect(self.save_to_pdf_file)
+        self.main_window.menu_bar.settings_action.triggered.connect(self.settings_dialogue.exec)
 
         # App Call
         self.app.exec()
@@ -49,36 +79,19 @@ class SimplexSolverApp:
         self.last_solution.function = self.main_window.input_box.get_function().split(",")
         self.last_solution.constraints = self.main_window.input_box.get_constraints()
 
-    def save_to_html_file(self):
-        dir_ = QFileDialog.getSaveFileName(None, 'Select a folder:', 'C:\\New Simplex Solution', "HTML Files (*.html)")
-        if dir_ is not None and dir_[0] != "":
-            self.set_html_converter()
-            self.html_converter.save_as_html(dir_[0])
+    @custom_export_factory(file_extensions="HTML Files (*.html)")
+    def save_to_html_file(self, directory):
+        self.html_converter.save_as_html(directory)
 
-    def save_to_document_file(self):
-        dir_ = QFileDialog.getSaveFileName(None, 'Select a folder:', 'C:\\New Simplex Solution', "Document Files (*.docx *.rtf *.doc *.docm *.odt)")
-        if dir_ is not None and dir_[0] != "":
-            self.set_html_converter()
-            self.doc_converter.set_lines(self.html_converter.convert())
-            self.doc_converter.save_as_document(dir_[0])
+    @custom_export_factory(file_extensions="Document Files (*.docx *.rtf *.doc *.docm *.odt)")
+    def save_to_document_file(self, directory):
+        self.doc_converter.set_lines(self.html_converter.convert())
+        self.doc_converter.save_as_document(directory)
 
-    def save_to_pdf_file(self):
-        dir_ = QFileDialog.getSaveFileName(None, 'Select a folder:', 'C:\\New Simplex Solution', "PowerPoint Files (*.pdf)")
-        if dir_ is not None and dir_[0] != "":
-            self.set_html_converter()
-            self.pdf_converter.set_lines(self.html_converter.convert())
-            self.pdf_converter.save_as_pdf(dir_[0])
-
-    def set_html_converter(self):
-        self.html_converter.set_problem(self.last_solution.problem)
-        self.html_converter.set_constraints(self.last_solution.constraints)
-        self.html_converter.set_equation(self.last_solution.function)
-        if len(self.last_solution.result.solution) != 0:
-            self.html_converter.set_solution(self.last_solution.result.solution)
-        if len(self.last_solution.result.steps) != 0:
-            self.html_converter.set_steps(self.last_solution.result.steps)
-            self.html_converter.variable_no = self.last_solution.variable_no
-            self.html_converter.constraints_no = self.last_solution.constraint_no
+    @custom_export_factory(file_extensions="PowerPoint Files (*.pdf)")
+    def save_to_pdf_file(self, directory):
+        self.pdf_converter.set_lines(self.html_converter.convert())
+        self.pdf_converter.save_as_pdf(directory)
 
 
 if __name__ == '__main__':
