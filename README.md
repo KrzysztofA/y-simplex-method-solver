@@ -4,7 +4,7 @@
   {
     "type": "PCSoftware",
     "ready": true,
-    "version": "0.4.7",
+    "version": "0.4.8",
     "main":
     [
       "Python",
@@ -21,7 +21,7 @@
       "Simplex",
       "Algorithms",
       "Education",
-      "FullStack",
+      "FullStack"
     ],
     "satisfaction": "8",
     "difficulty": "7",
@@ -31,7 +31,7 @@
 }
 -->
 
-# y-simplex-method-solver v0.4.7 (Windows)
+# y-simplex-method-solver v0.4.8 (Windows)
 
 ## Simplex Method Mathematical Software with C++ API and Python GUI
 
