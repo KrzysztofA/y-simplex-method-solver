@@ -10,3 +10,4 @@ class SimplexFile:
     filename: str
     input: InputStruct
     output: FullSolutionStruct
+    filedir: str = ""

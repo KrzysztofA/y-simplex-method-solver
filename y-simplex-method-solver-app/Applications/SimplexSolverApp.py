@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QFileDialog
+from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from Controller.SettingsController import SettingsController
 from View import MainWindow, SettingsDialogue
@@ -41,9 +41,6 @@ class SimplexSolverApp:
         # Entry point needs to be QApplication
         self.app = QApplication(sys.argv)
 
-        # Variables
-        self.last_solution = FullSolutionStruct("", {0: ""}, ResultStruct("", {0: ""}, {0: ""}))
-
         # Controller
         self.simplex_backend = SimplexBackendController()
         self.html_converter = ToHTMLConverter()
@@ -52,6 +49,11 @@ class SimplexSolverApp:
         self.save_load_controller = SaveLoadController()
 
         self.settings_controller = SettingsController()
+
+        # Variables
+        self.last_solution = FullSolutionStruct("", {0: ""}, ResultStruct("", {0: ""}, {0: ""}))
+        self.files = [self.settings_controller.settings.default_save_name]
+        self.current_index = 0
 
         # View
         self.main_window = MainWindow()
@@ -63,7 +65,8 @@ class SimplexSolverApp:
         self.main_window.menu_bar.to_doc_action.triggered.connect(self.save_to_document_file)
         self.main_window.menu_bar.to_pdf_action.triggered.connect(self.save_to_pdf_file)
         self.main_window.menu_bar.settings_action.triggered.connect(self.settings_dialogue.exec)
-        self.main_window.menu_bar.save_action.triggered.connect(self.save_file)
+        self.main_window.menu_bar.save_action.triggered.connect(self.save_or_save_as)
+        self.main_window.menu_bar.save_as_action.triggered.connect(self.save_as)
         self.main_window.menu_bar.load_action.triggered.connect(self.load_file)
 
         # App Call
@@ -96,10 +99,25 @@ class SimplexSolverApp:
         self.pdf_converter.set_lines(self.html_converter.convert())
         self.pdf_converter.save_as_pdf(directory)
 
-    def save_file(self):
-        dir_ = QFileDialog.getSaveFileName(None, 'Select a folder:', f'{self.settings_controller.default_save_path}',
+    def save_as(self):
+        save_path = f'{self.settings_controller.default_save_path}'
+        if os.path.isfile(self.files[self.current_index]):
+            save_path = f'{self.files[self.current_index]}'
+
+        dir_ = QFileDialog.getSaveFileName(None, 'Select a folder:', save_path,
                                            "Simplex Solver File (*.yse)")
         if dir_ is not None and dir_[0] != "":
+            self.save_file(dir_[0])
+
+    def save_or_save_as(self):
+        save_path = f'{self.settings_controller.default_save_path}'
+        if os.path.isfile(self.files[self.current_index]):
+            self.save_file(self.files[self.current_index])
+        else:
+            self.save_as()
+
+    def save_file(self, directory):
+        if directory != "":
 
             # Collect Input
             input_part = InputStruct(
@@ -115,22 +133,25 @@ class SimplexSolverApp:
 
             self.save_load_controller.set_input_data(input_part)
             self.save_load_controller.set_output_data(output_part)
-            self.save_load_controller.save(dir_[0])
+            self.save_load_controller.save(directory)
 
     def load_file(self):
         dir_ = QFileDialog.getOpenFileName(None, 'Select a file:',
                                            f'{self.settings_controller.settings.default_save_dir}',
                                            "Simplex Solver File (*.yse)")
         if dir_ is not None and dir_[0] != "":
-            loaded_file = self.save_load_controller.load(dir_[0])
-            loaded_file.output.problem = loaded_file.output.problem
-            self.last_solution = loaded_file.output
-            self.main_window.variable_number.setValue(loaded_file.input.variable_no)
-            self.main_window.constraint_number.setValue(loaded_file.input.constraint_no)
-            self.main_window.problem_type.setCurrentIndex(0 if loaded_file.input.problem == ProblemType.Maximization else 1)
-            self.main_window.input_box.set_function(loaded_file.input.function_input)
-            self.main_window.input_box.set_constraints_values(loaded_file.input.constraints)
-            self.main_window.output_box.set_result(self.last_solution.result.solution.split())
+            try:
+                loaded_file = self.save_load_controller.load(dir_[0])
+                loaded_file.output.problem = loaded_file.output.problem
+                self.last_solution = loaded_file.output
+                self.main_window.variable_number.setValue(loaded_file.input.variable_no)
+                self.main_window.constraint_number.setValue(loaded_file.input.constraint_no)
+                self.main_window.problem_type.setCurrentIndex(0 if loaded_file.input.problem == ProblemType.Maximization else 1)
+                self.main_window.input_box.set_function(loaded_file.input.function_input)
+                self.main_window.input_box.set_constraints_values(loaded_file.input.constraints)
+                self.main_window.output_box.set_result(self.last_solution.result.solution.split())
+            except Exception:
+                QMessageBox.critical(self.main_window, "Error", "Failed to load file, file may be corrupted")
 
 
 if __name__ == '__main__':

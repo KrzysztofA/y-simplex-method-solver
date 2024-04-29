@@ -1,5 +1,5 @@
 import os
-from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel, QGridLayout, QSpinBox, QPushButton, QComboBox, QMenuBar
+from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel, QGridLayout, QSpinBox, QPushButton, QComboBox
 
 from dotenv import load_dotenv
 from View.MainView import MenuBar

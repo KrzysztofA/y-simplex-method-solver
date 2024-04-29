@@ -5,12 +5,12 @@ from Model import ProblemType
 
 
 class Constraint(QWidget):
-    def __init__(self, var_no=2):
+    def __init__(self, var_no=2, problem=ProblemType.Maximization):
         super().__init__()
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
         self.equals = NumberLineEdit()
-        self.eq_label = QLabel(" \u2265 ")
+        self.eq_label = QLabel(f" {"\u2265" if problem==ProblemType.Maximization else "\u2264"} ")
         self.layout.addWidget(self.equals)
         self.layout.addWidget(self.eq_label)
         self.vars = []

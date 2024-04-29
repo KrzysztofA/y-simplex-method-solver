@@ -23,11 +23,13 @@ class InputBox(QScrollArea):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.setWidgetResizable(True)
         self.constraints = []
+        self.problem = ProblemType.Maximization
         self.var_no = 2
         self.widget.setLayout(self.layout)
         self.set_constraints(2)
 
     def set_problem(self, problem: ProblemType):
+        self.problem = problem
         for constraint in self.constraints:
             constraint.set_problem(problem)
         self.function.set_problem(problem)
@@ -52,7 +54,7 @@ class InputBox(QScrollArea):
         else:
             old_len = len(self.constraints)
             for i in range(len(self.constraints), const_no):
-                self.constraints.append(Constraint(self.var_no))
+                self.constraints.append(Constraint(self.var_no, self.problem))
             for i in range(old_len, len(self.constraints)):
                 self.layout.addWidget(self.constraints[i])
 
