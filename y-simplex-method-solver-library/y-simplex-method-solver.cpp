@@ -136,6 +136,7 @@ std::vector<yasuzume::math::Fraction> convert_string_to_fraction_vector( const s
   strtk::std_string::token_list_type                               split_input;
   std::vector<std::string>                                         split_vector {};
   const strtk::single_delimiter_predicate predicate( ',' );
+  const strtk::single_delimiter_predicate predicate_division( '/' );
   split( predicate, _input_string, std::back_inserter( split_input ), strtk::split_options::compress_delimiters );
   for( const auto& key : split_input | std::views::keys ) split_vector.emplace_back( key );
   for( auto& i : split_vector )
@@ -144,8 +145,8 @@ std::vector<yasuzume::math::Fraction> convert_string_to_fraction_vector( const s
     {
       strtk::std_string::token_list_type split_number {};
       std::vector<std::string>           number_vector {};
-      for( const auto& key : split_input | std::views::keys ) split_vector.emplace_back( key );
-      split( predicate, i, std::back_inserter( split_number ), strtk::split_options::compress_delimiters );
+      split( predicate_division, i, std::back_inserter( split_number ), strtk::split_options::compress_delimiters );
+      for( const auto& key : split_number | std::views::keys ) number_vector.emplace_back( key );
       return_vector.emplace_back( std::stoi( number_vector.at( 0 ) ), std::stoi( number_vector.at( 1 ) ) );
     }
     else return_vector.emplace_back( std::stoi( i ) );
