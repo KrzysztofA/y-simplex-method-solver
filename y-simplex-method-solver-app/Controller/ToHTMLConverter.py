@@ -18,7 +18,7 @@ class ToHTMLConverter:
         self.constraints_no: int = 0
 
     def set_equation(self, equation: str):
-        self.equation = [a.strip() for a in equation.split()]
+        self.equation = [a.strip() for a in equation.split(",")]
 
     def set_constraints(self, constraints: Dict[int, str]):
         constraints = [v for k, v in sorted(constraints.items(), key=lambda pair: pair[0])]

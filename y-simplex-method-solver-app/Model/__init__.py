@@ -4,3 +4,4 @@ from .FullSolutionStruct import *
 from .Settings import *
 from .InputStruct import *
 from .SimplexFile import *
+from .Singleton import *

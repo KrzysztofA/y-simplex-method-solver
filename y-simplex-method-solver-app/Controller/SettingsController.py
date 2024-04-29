@@ -4,9 +4,10 @@ from Model import Settings
 from os import path
 import pathlib
 from cryptography.fernet import Fernet
+from Model import Singleton
 
 
-class SettingsController:
+class SettingsController(metaclass=Singleton):
     def __init__(self):
         self.settings_directory = path.join("Files", "Other")
         self.settings = Settings()
@@ -16,6 +17,8 @@ class SettingsController:
 
     def save(self):
         json_file = self.settings.to_json()
+        if not path.isdir(self.settings_directory):
+            os.mkdir(self.settings_directory)
         with open(path.join(self.settings_directory, "settings.json"), "w") as settings_file:
             settings_file.write(json_file)
         self.default_save_path = path.join(self.settings.default_save_dir, self.settings.default_save_name)

@@ -1,8 +1,8 @@
-from Model import ProblemType
+from Model import ProblemType, Singleton
 import subprocess
 
 
-class SimplexBackendController:
+class SimplexBackendController(metaclass=Singleton):
     def __init__(self):
         self.problem_type: ProblemType = ProblemType.Maximization
         self.collect_steps: bool = False

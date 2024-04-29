@@ -9,7 +9,7 @@ class MenuBar(QMenuBar):
         edit_menu = self.addMenu("&Edit")
         self.addSeparator()
         help_menu = self.addMenu("&Help")
-        file_menu.addAction("&New")
+        self.new_action = file_menu.addAction("&New")
         self.save_action = file_menu.addAction("&Save")
         self.save_as_action = file_menu.addAction("&Save As")
         self.load_action = file_menu.addAction("Load")

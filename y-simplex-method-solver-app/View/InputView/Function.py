@@ -10,14 +10,14 @@ class Function(QWidget):
         self.z_label = QLabel("Z \u2264 ")
         self.layout.addWidget(self.z_label)
         self.setLayout(self.layout)
-        self.vars  = []
+        self.vars = []
         self.synchronize_variables(2)
 
     def set_problem(self, problem: ProblemType):
         if problem is ProblemType.Maximization:
-            self.z_label.setText( "Z \u2264 " )
+            self.z_label.setText("Z \u2264 ")
         elif problem is ProblemType.Minimization:
-            self.z_label.setText( "Z \u2265 " )
+            self.z_label.setText("Z \u2265 ")
 
     def synchronize_variables(self, var_no: int):
         if var_no < len(self.vars):
@@ -39,6 +39,6 @@ class Function(QWidget):
         return return_string
 
     def set_variables_from_string(self, function_string: str):
-        function = function_string.split(",")
+        function = [a.strip() for a in function_string.split(",")]
         for i in range(0, len(self.vars)):
             self.vars[i].set_value(function[i])

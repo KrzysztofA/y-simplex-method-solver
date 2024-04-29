@@ -8,10 +8,9 @@ import os
 
 
 class SettingsDialogue(QDialog):
-    def __init__(self, settings_controller: SettingsController,  parent=None):
+    def __init__(self, parent=None):
         super(SettingsDialogue, self).__init__(parent)
 
-        self.settings_controller = settings_controller
         self.setWindowTitle("Settings")
         qbuttons = QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Apply | QDialogButtonBox.StandardButton.Cancel
         self.setContentsMargins(0, 0, 0, 0)
@@ -26,7 +25,7 @@ class SettingsDialogue(QDialog):
 
         self.settings_view = QStackedWidget()
         self.settings_menu = SettingsMenu(self.settings_view)
-        self.general_settings = GeneralSettings(self.settings_controller)
+        self.general_settings = GeneralSettings()
         self.settings_view.addWidget(self.general_settings)
 
         self.grid_box.setVerticalSpacing(0)
@@ -36,16 +35,16 @@ class SettingsDialogue(QDialog):
         self.grid_box.addWidget(self.button_box, 1, 0, 1, 4, Qt.AlignmentFlag.AlignCenter)
 
     def accept_settings(self):
-        self.settings_controller.save()
+        SettingsController().save()
         self.accept()
 
     def reject_settings(self):
-        self.settings_controller.load()
+        SettingsController().load()
         self.general_settings.reset_setting()
         self.reject()
 
     def apply(self):
-        self.settings_controller.save()
+        SettingsController().save()
 
     def exec(self):
         self.general_settings.reset_setting()

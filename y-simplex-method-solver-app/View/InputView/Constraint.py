@@ -10,7 +10,7 @@ class Constraint(QWidget):
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
         self.equals = NumberLineEdit()
-        self.eq_label = QLabel(f" {"\u2265" if problem==ProblemType.Maximization else "\u2264"} ")
+        self.eq_label = QLabel(f" {"\u2265" if problem == ProblemType.Maximization else "\u2264"} ")
         self.layout.addWidget(self.equals)
         self.layout.addWidget(self.eq_label)
         self.vars = []
@@ -42,7 +42,7 @@ class Constraint(QWidget):
         return return_string
 
     def set_values_from_string(self, constraint_string: str):
-        constraint = constraint_string.split(",")
+        constraint = [a.strip() for a in constraint_string.split(",")]
         self.equals.set_value(constraint[-1])
         for i in range(0, len(self.vars)):
             self.vars[i].set_value(constraint[i])
