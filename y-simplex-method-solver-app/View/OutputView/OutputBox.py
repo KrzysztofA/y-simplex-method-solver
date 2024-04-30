@@ -1,35 +1,20 @@
-from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout
-from PyQt6.QtCore import Qt
-from .VariableOutputView import VariableOutputView
+from PyQt6.QtWidgets import QWidget, QTabWidget
+from .SolutionView import SolutionView
+from .GraphOutputView import GraphOutputView
 
 
-class OutputBox(QScrollArea):
+class OutputBox(QTabWidget):
     def __init__(self):
         super().__init__()
-        self.widget = QWidget(self)
-        self.setWidget(self.widget)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.setWidgetResizable(True)
-        self.widget.setLayout(QVBoxLayout())
-        self.z = VariableOutputView(-1)
-        self.widget.layout().addWidget(self.z)
-        self.vars = []
-        self.synchronize_variables(2)
+        self.solution_view = SolutionView(self)
+        self.addTab(self.solution_view, "Solution View")
+        self.graph_view = GraphOutputView(self)
+        self.addTab(self.graph_view, "Graph View")
+        self.addTab(QWidget(self), "Full Output View")
 
     def synchronize_variables(self, var_no):
-        if var_no < len(self.vars):
-            for i in self.vars[var_no:]:
-                self.widget.layout().removeWidget(i)
-                self.vars.remove(i)
-        else:
-            old_len = len(self.vars)
-            for i in range(len(self.vars), var_no):
-                self.vars.append(VariableOutputView(i))
-            for i in range(old_len, len(self.vars)):
-                self.widget.layout().addWidget(self.vars[i])
+        self.solution_view.synchronize_variables(var_no)
+        self.graph_view.synchronize_variables(var_no)
 
     def set_result(self, result: []):
-        self.z.change_ans(result[0])
-        for i in range(0, len(self.vars)):
-            self.vars[i].change_ans(result[i + 1])
+        self.solution_view.set_result(result)

@@ -18,7 +18,7 @@ class FileView(QWidget):
 
         self.grid_layout.addWidget(QLabel("Variables No.:"), 1, 0)
         self.variable_number = QSpinBox()
-        self.variable_number.setMinimum(1)
+        self.variable_number.setMinimum(2)
         self.variable_number.setValue(2)
         self.variable_number.valueChanged.connect(self.input_box.synchronize_variables)
         self.variable_number.valueChanged.connect(self.output_box.synchronize_variables)

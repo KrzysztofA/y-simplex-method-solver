@@ -14,4 +14,3 @@ class VariableOutputView(QLabel):
             self.setText(f"x{self.number} = {ans}")
         else:
             self.setText(f"Z = {ans}")
-
