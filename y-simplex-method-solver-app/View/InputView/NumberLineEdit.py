@@ -11,6 +11,7 @@ class NumberLineEdit(QLineEdit):
         self.validator.setRegularExpression(self.reg)
         self.setValidator(self.validator)
         self.setText("0")
+        #self.textChanged.connect()
 
     def get_value(self):
         return super().text()

@@ -2,13 +2,16 @@ from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QResizeEvent
 from PyQt6.QtWidgets import QWidget, QCheckBox, QVBoxLayout, QLabel, QScrollArea, QHBoxLayout, QSizePolicy
 import pyqtgraph as pg
-from typing import List
+from typing import List, Tuple
 
 
 class GraphOutputView(QScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.grid_h_limits: int = 4
+
+        self.results = []
+        self.solution_ready = False
 
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
@@ -29,8 +32,12 @@ class GraphOutputView(QScrollArea):
         self.vbox.addWidget(self.variables_box)
         self.variables: List[QCheckBox] = []
         self.checked_boxes: List[QCheckBox] = []
+        self.checked_boxes_indexes: Tuple[int, int] = (0, 0)
         self.synchronize_variables(2)
         self.resizeEvent = self.on_resize
+        self.solution_view = pg.ScatterPlotItem()
+        self.solution_view.setData()
+        self.plot.addItem(self.solution_view)
 
     def synchronize_variables(self, var_no: int):
         if var_no < len(self.variables):
@@ -51,27 +58,24 @@ class GraphOutputView(QScrollArea):
     def on_resize(self, event: QResizeEvent):
         self.parent().resizeEvent(event)
         self.plot.setMinimumWidth(event.size().width())
-        self.plot.setMinimumHeight(int(event.size().height()*3/5))
+        self.plot.setMinimumHeight(int(event.size().height() * 3 / 5))
         if event.size().width() + self.verticalScrollBar().width() == event.oldSize().width():
             return
         self.change_grid_horizontal_limits(event.size().width() / 75)
-        """
-        if event.size().width() > 275 >= event.oldSize().width():
-            self.change_grid_horizontal_limits(5)
-        elif event.size().width() > 225 >= event.oldSize().width() or event.size().width() < 275 <= event.oldSize().width():
-            self.change_grid_horizontal_limits(4)
-        elif event.size().width() > 190 >= event.oldSize().width() or event.size().width() < 215 <= event.oldSize().width():
-            self.change_grid_horizontal_limits(3)
-        elif event.size().width() < 190 <= event.oldSize().width():
-            self.change_grid_horizontal_limits(2)
-        """
 
     def synchronize_checked(self):
+        if len(self.checked_boxes) == 2 and self.checked_boxes[1] not in self.variables:
+            self.checked_boxes.remove(self.checked_boxes[1])
+        if len(self.checked_boxes) >= 1 and self.checked_boxes[0] not in self.variables:
+            self.checked_boxes.remove(self.checked_boxes[0])
         if len(self.checked_boxes) < 2:
-            index = -2 if self.variables[-2] not in self.checked_boxes else -1
+            index = -1 if self.variables[-1] not in self.checked_boxes else -2
             self.variables[index].setChecked(True)
             self.checked_boxes.append(self.variables[index])
             self.synchronize_checked()
+        if len(self.checked_boxes) == 2:
+            self.checked_boxes_indexes = (
+                self.variables.index(self.checked_boxes[0]), self.variables.index(self.checked_boxes[1]))
 
     def on_check(self, box: QCheckBox):
         if box.checkState() == Qt.CheckState.Unchecked and box in self.checked_boxes:
@@ -81,6 +85,10 @@ class GraphOutputView(QScrollArea):
             self.checked_boxes.pop(0)
             temp.setChecked(False)
             self.checked_boxes.append(box)
+        if len(self.checked_boxes) >= 2:
+            self.checked_boxes_indexes = (
+                self.variables.index(self.checked_boxes[0]), self.variables.index(self.checked_boxes[1]))
+        self.display_selected_variables()
 
     def change_grid_horizontal_limits(self, new_limits: int):
         if new_limits != self.grid_h_limits:
@@ -126,3 +134,22 @@ class GraphOutputView(QScrollArea):
             item.deleteLater()
         for i in reversed(temp_arr):
             self.add_to_grid(i)
+
+    def set_result(self, result: []):
+        self.results = [float(a.split("/")[0]) / float(a.split("/")[1]) if "/" in a else float(a) for a in result]
+        print(self.results)
+        self.solution_ready = True
+        self.display_selected_variables()
+
+    def on_constraint_change(self):
+        self.solution_ready = False
+        self.solution_view.setData()
+
+    def on_function_change(self):
+        self.solution_ready = False
+        self.solution_view.setData()
+
+    def display_selected_variables(self):
+        if self.solution_ready:
+            point = (self.results[self.checked_boxes_indexes[0] + 1], self.results[self.checked_boxes_indexes[1] + 1])
+            self.solution_view.setData([point[0]], [point[1]])

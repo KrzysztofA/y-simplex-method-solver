@@ -19,3 +19,4 @@ class OutputBox(QTabWidget):
 
     def set_result(self, result: []):
         self.solution_view.set_result(result)
+        self.graph_view.set_result(result)

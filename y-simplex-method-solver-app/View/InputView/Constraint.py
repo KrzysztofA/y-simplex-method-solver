@@ -46,3 +46,6 @@ class Constraint(QWidget):
         self.equals.set_value(constraint[-1])
         for i in range(0, len(self.vars)):
             self.vars[i].set_value(constraint[i])
+
+    def on_value_change(self):
+        self.equals.get_value()
