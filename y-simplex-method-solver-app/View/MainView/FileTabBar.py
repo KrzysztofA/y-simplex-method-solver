@@ -3,12 +3,14 @@ from Model import SimplexFile
 from typing import List
 from .FileView import FileView
 from Controller import SettingsController
+import os
 
 
 class FileTabBar(QTabWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setDocumentMode(True)
+        self.open_file_paths: List[str] = []
         self.open_files: List[FileView] = []
         self.setTabShape(QTabWidget.TabShape.Triangular)
         self.setMovable(True)
@@ -17,10 +19,13 @@ class FileTabBar(QTabWidget):
         self.tabBar().tabCloseRequested.connect(self.tab_close_requested)
 
     def set_current_file(self, file: SimplexFile):
+        if file.filedir in self.open_file_paths:
+            return
         self.setTabText(self.currentIndex(), file.filename)
         if len(self.open_files) == 0:
             self.add_file(file)
         else:
+            self.open_file_paths.append(file.filedir)
             self.open_files[self.currentIndex()].set_file(file)
 
     def collect_current_file(self):
@@ -35,7 +40,10 @@ class FileTabBar(QTabWidget):
         self.setTabText(self.currentIndex(), new_name)
 
     def add_file(self, file: SimplexFile):
+        if file.filedir in self.open_file_paths:
+            return
         self.open_files.append(FileView(file))
+        self.open_file_paths.append(file.filedir)
         self.addTab(self.open_files[-1], file.filename)
         self.setCurrentIndex(len(self.open_files) - 1)
 
@@ -45,6 +53,9 @@ class FileTabBar(QTabWidget):
         self.open_files.insert(new_tab_index, temp)
 
     def tab_close_requested(self, index: int):
+        temp = self.open_files[index]
+        if temp.directory in self.open_file_paths:
+            self.open_file_paths.remove(temp.directory)
         self.open_files.pop(index)
         self.removeTab(index)
 

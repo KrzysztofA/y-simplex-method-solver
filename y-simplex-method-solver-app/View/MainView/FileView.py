@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import QWidget, QGridLayout, QLabel, QSpinBox, QPushButton, QComboBox
+from PyQt6.QtWidgets import QWidget, QGridLayout, QLabel, QSpinBox, QPushButton, QComboBox, QSplitter
+from PyQt6.QtCore import Qt
 from View.InputView import InputBox
 from View.OutputView import OutputBox
 from Model import SimplexFile, ProblemType, FullSolutionStruct, ResultStruct, InputStruct
@@ -10,11 +11,16 @@ class FileView(QWidget):
         super().__init__()
         self.last_solution = FullSolutionStruct("", {0: ""}, ResultStruct("", {0: ""}, {0: ""}))
         self.grid_layout = QGridLayout()
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
         self.setLayout(self.grid_layout)
         self.output_box = OutputBox()
-        self.grid_layout.addWidget(self.output_box, 0, 5, 1, 2)
+
         self.input_box = InputBox()
-        self.grid_layout.addWidget(self.input_box, 0, 0, 1, 5)
+        self.splitter.addWidget(self.input_box)
+        self.splitter.addWidget(self.output_box)
+        self.splitter.setCollapsible(0, False)
+        self.splitter.setCollapsible(1, False)
+        self.grid_layout.addWidget(self.splitter, 0, 0, 1, 7)
 
         self.grid_layout.addWidget(QLabel("Variables No.:"), 1, 0)
         self.variable_number = QSpinBox()

@@ -1,8 +1,8 @@
-from Model import FullSolutionStruct, InputStruct, SimplexFile
+from Model import FullSolutionStruct, InputStruct, SimplexFile, Singleton
 import pathlib
 
 
-class SaveLoadController:
+class SaveLoadController(metaclass=Singleton):
     def __init__(self, input_data: InputStruct | None = None, output_data: FullSolutionStruct | None = None):
         self.input_data = input_data
         self.output_data = output_data

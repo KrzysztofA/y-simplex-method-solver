@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QTabWidget
+from PyQt6.QtWidgets import QWidget, QTabWidget, QSizePolicy
 from .SolutionView import SolutionView
 from .GraphOutputView import GraphOutputView
 
@@ -6,6 +6,7 @@ from .GraphOutputView import GraphOutputView
 class OutputBox(QTabWidget):
     def __init__(self):
         super().__init__()
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.solution_view = SolutionView(self)
         self.addTab(self.solution_view, "Solution View")
         self.graph_view = GraphOutputView(self)

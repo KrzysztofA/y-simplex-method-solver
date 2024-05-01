@@ -1,5 +1,6 @@
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QCheckBox, QVBoxLayout, QLabel, QScrollArea, QGridLayout, QApplication, QHBoxLayout
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QResizeEvent
+from PyQt6.QtWidgets import QWidget, QCheckBox, QVBoxLayout, QLabel, QScrollArea, QHBoxLayout, QSizePolicy
 import pyqtgraph as pg
 from typing import List
 
@@ -15,6 +16,7 @@ class GraphOutputView(QScrollArea):
         self.main_widget = QWidget(self)
         self.setWidget(self.main_widget)
         self.plot = pg.PlotWidget(self)
+        self.plot.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.vbox = QVBoxLayout()
         self.main_widget.setLayout(self.vbox)
         self.vbox.addWidget(self.plot)
@@ -28,6 +30,7 @@ class GraphOutputView(QScrollArea):
         self.variables: List[QCheckBox] = []
         self.checked_boxes: List[QCheckBox] = []
         self.synchronize_variables(2)
+        self.resizeEvent = self.on_resize
 
     def synchronize_variables(self, var_no: int):
         if var_no < len(self.variables):
@@ -44,6 +47,24 @@ class GraphOutputView(QScrollArea):
             for i in range(old_len, len(self.variables)):
                 self.add_to_grid(self.variables[i])
         self.synchronize_checked()
+
+    def on_resize(self, event: QResizeEvent):
+        self.parent().resizeEvent(event)
+        self.plot.setMinimumWidth(event.size().width())
+        self.plot.setMinimumHeight(int(event.size().height()*3/5))
+        if event.size().width() + self.verticalScrollBar().width() == event.oldSize().width():
+            return
+        self.change_grid_horizontal_limits(event.size().width() / 75)
+        """
+        if event.size().width() > 275 >= event.oldSize().width():
+            self.change_grid_horizontal_limits(5)
+        elif event.size().width() > 225 >= event.oldSize().width() or event.size().width() < 275 <= event.oldSize().width():
+            self.change_grid_horizontal_limits(4)
+        elif event.size().width() > 190 >= event.oldSize().width() or event.size().width() < 215 <= event.oldSize().width():
+            self.change_grid_horizontal_limits(3)
+        elif event.size().width() < 190 <= event.oldSize().width():
+            self.change_grid_horizontal_limits(2)
+        """
 
     def synchronize_checked(self):
         if len(self.checked_boxes) < 2:
@@ -62,8 +83,9 @@ class GraphOutputView(QScrollArea):
             self.checked_boxes.append(box)
 
     def change_grid_horizontal_limits(self, new_limits: int):
-        self.grid_h_limits = new_limits
-        self.restructure_grid()
+        if new_limits != self.grid_h_limits:
+            self.grid_h_limits = new_limits
+            self.restructure_grid()
 
     def add_to_grid(self, widget: QWidget):
         if self.variables_box_layout.count() == 0:

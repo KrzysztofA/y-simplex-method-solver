@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from Controller.SettingsController import SettingsController
+from Model import SimplexFile
 from View import MainWindow, SettingsDialogue
 from PyQt6.QtWidgets import QApplication
 from Controller import SimplexBackendController, ToPDFConverter
@@ -47,10 +48,11 @@ class SimplexSolverApp:
         self.html_converter = ToHTMLConverter()
         self.doc_converter = ToDocumentConverter()
         self.pdf_converter = ToPDFConverter()
-        self.save_load_controller = SaveLoadController()
 
         # Views
         self.main_window = MainWindow()
+        self.main_window.setMinimumSize(640, 420)
+        self.main_window.folder_view.working_directory_view.open_file_callbacks.append(self.open_file)
         self.settings_dialogue = SettingsDialogue()
 
         # Stream from View To Controller
@@ -109,7 +111,7 @@ class SimplexSolverApp:
             file = self.main_window.tab_bar.collect_current_file()
 
             # Save
-            self.save_load_controller.save(directory, file)
+            SaveLoadController().save(directory, file)
             self.main_window.tab_bar.set_current_file(file)
 
     def load_file(self):
@@ -118,13 +120,15 @@ class SimplexSolverApp:
                                            "Simplex Solver File (*.yse)")
         if dir_ is not None and dir_[0] != "":
             try:
-                loaded_file = self.save_load_controller.load(dir_[0])
-                if SettingsController().settings.open_in_new_tab:
-                    self.main_window.tab_bar.add_file(loaded_file)
-                else:
-                    self.main_window.tab_bar.set_current_file(loaded_file)
+                self.open_file(SaveLoadController().load(dir_[0]))
             except Exception:
                 QMessageBox.critical(self.main_window, "Error", "Failed to load file, file may be corrupted")
+
+    def open_file(self, loaded_file: SimplexFile):
+        if SettingsController().settings.open_in_new_tab:
+            self.main_window.tab_bar.add_file(loaded_file)
+        else:
+            self.main_window.tab_bar.set_current_file(loaded_file)
 
 
 if __name__ == '__main__':

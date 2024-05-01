@@ -1,14 +1,10 @@
 import os
-from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel, QGridLayout, QSpinBox, QPushButton, QComboBox, QTabWidget
+from PyQt6.QtWidgets import QMainWindow, QWidget, QSplitter
 
 from dotenv import load_dotenv
 from View.MainView import MenuBar
-from View.InputView import InputBox
-from View.OutputView import OutputBox
-from .FileView import FileView
-from Model.ProblemType import ProblemType
 from .FileTabBar import FileTabBar
-from Controller import SettingsController
+from View.DirectoryView import WorkingDirectoryView, DirectoryViewWidget
 
 
 class MainWindow(QMainWindow):
@@ -16,13 +12,19 @@ class MainWindow(QMainWindow):
         super().__init__()
         load_dotenv()
         self.setWindowTitle(f'Simplex Method Solver by Yasuzume {os.getenv("YSIMPLEXMETHODSOLVERVER", "Unversioned")}')
-        self.main_widget = QWidget()
+        self.main_widget = QSplitter()
+        self.folder_view = DirectoryViewWidget()
         self.tab_bar = FileTabBar()
         self.tab_bar.add_new_file()
         self.tab_bar.setCurrentIndex(0)
         self.current_tab_index = 0
 
-        self.setCentralWidget(self.tab_bar)
+        self.main_widget.addWidget(self.folder_view)
+        self.main_widget.addWidget(self.tab_bar)
+        self.main_widget.setCollapsible(0, False)
+        self.main_widget.setCollapsible(1, False)
+
+        self.setCentralWidget(self.main_widget)
 
         self.menu_bar = MenuBar()
         self.setMenuBar(self.menu_bar)
