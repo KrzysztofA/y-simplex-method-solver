@@ -12,7 +12,6 @@ class VariableInputView(QWidget):
         self.layout().addWidget(self.variable_edit)
         self.layout().addWidget(QLabel(f"x{no}"))
 
-
     def get_value(self):
         return self.variable_edit.get_value()
 

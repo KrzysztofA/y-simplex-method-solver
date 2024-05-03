@@ -16,7 +16,6 @@ class FileView(QWidget):
         self.output_box = OutputBox()
 
         self.input_box = InputBox(self)
-        print(self.input_box.parent())
         self.splitter.addWidget(self.input_box)
         self.splitter.addWidget(self.output_box)
         self.splitter.setCollapsible(0, False)

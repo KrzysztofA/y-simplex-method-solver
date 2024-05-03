@@ -175,14 +175,12 @@ class GraphOutputView(QScrollArea):
             self.solution_view.setData([point[0]], [point[1]])
 
     def set_function(self, function):
-        function_float = [self.get_float(a) for a in function]
-        function_points = [a/function_float[0] for a in function_float[1:]]
-        angle = self.get_angle(function_points)
-        self.function_line.setPos(QPointF(function_points[self.checked_boxes_indexes[0]], function_points[self.checked_boxes_indexes[1]]))
+        angle = self.get_angle(function)
+        self.function_line.setPos(self.get_point(function))
         self.function_line.setAngle(angle)
 
     def update_constraint_functions(self, functions):
-        self.constraint_functions = [[self.get_float(a)/self.get_float(b[0]) if self.get_float(b[0]) != 0 else 0 for a in b[1:]] for b in functions]
+        self.constraint_functions = functions
         if len(self.constraint_functions) < len(self.constraint_lines):
             for i in range(len(self.constraint_functions), len(self.constraint_lines)):
                 self.plot.removeItem(self.constraint_lines[i])
@@ -190,9 +188,8 @@ class GraphOutputView(QScrollArea):
         elif len(self.constraint_functions) > len(self.constraint_lines):
             for i in range(len(self.constraint_lines), len(self.constraint_functions)):
                 angle = self.get_angle(self.constraint_functions[i])
-                self.constraint_lines.append(pg.InfiniteLine(QPointF(self.constraint_functions[i][self.checked_boxes_indexes[0]], self.constraint_functions[i][self.checked_boxes_indexes[1]]), angle))
+                self.constraint_lines.append(pg.InfiniteLine(self.get_point(self.constraint_functions[i]), angle))
                 self.plot.addItem(self.constraint_lines[-1])
-
         self.set_constraints_values()
 
     def set_constraints_values(self):
@@ -201,19 +198,27 @@ class GraphOutputView(QScrollArea):
 
     def set_constraint_values(self, index, function):
         angle = self.get_angle(function)
-        self.constraint_lines[index].setPos(QPointF(function[self.checked_boxes_indexes[0]], function[self.checked_boxes_indexes[1]]))
+        self.constraint_lines[index].setPos(self.get_point(function))
         self.constraint_lines[index].setAngle(angle)
 
+    def get_point(self, function):
+        y_coefficient = function[self.checked_boxes_indexes[1] + 1]
+        x_coefficient = function[self.checked_boxes_indexes[0] + 1]
+        x_part = 0
+        y_part = 0
+        if x_coefficient != 0:
+            x_part = function[0] / x_coefficient
+        elif y_coefficient != 0:
+            y_part = function[0] / y_coefficient
+
+        return QPointF(x_part, y_part)
+
     def get_angle(self, function):
+        from_point = self.get_point(function)
         if function[self.checked_boxes_indexes[0]] == 0:
             angle = 0
         elif function[self.checked_boxes_indexes[1]] == 0:
             angle = 90
         else:
-            angle = math.degrees(
-                math.atan(function[self.checked_boxes_indexes[0]] / function[self.checked_boxes_indexes[1]]))
+            angle = math.degrees(math.atan2(function[self.checked_boxes_indexes[1] + 1] / function[0], function[self.checked_boxes_indexes[0] + 1] / function[0]))
         return angle
-
-    @staticmethod
-    def get_float(value_string):
-        return float(value_string.split("/")[0]) / float(value_string.split("/")[1]) if "/" in value_string else float(value_string)

@@ -1,13 +1,13 @@
 from PyQt6.QtWidgets import QScrollArea, QLabel, QVBoxLayout, QSizePolicy, QWidget
 from PyQt6.QtCore import Qt
-from .Function import Function
+from .ObjectiveFunction import ObjectiveFunction
 from .Constraint import Constraint
 from Model import ProblemType
 from typing import Dict
 
 
 class InputBox(QScrollArea):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         self.layout = QVBoxLayout()
         label = QLabel("Function:")
@@ -16,7 +16,7 @@ class InputBox(QScrollArea):
 
         self.widget = QWidget(self)
         self.setWidget(self.widget)
-        self.function = Function(parent)
+        self.function = ObjectiveFunction()
         self.layout.addWidget(self.function)
         self.setMinimumSize(320, 250)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
@@ -71,9 +71,9 @@ class InputBox(QScrollArea):
         return [a.get_variables_string() for a in self.constraints]
 
     def get_all_list(self):
-        return_list = [self.function.get_variables_list()]
+        return_list = [self.function.get_variables_float_list()]
         for constraint in self.constraints:
-            return_list.append(constraint.get_variables_list())
+            return_list.append(constraint.get_variables_float_list())
         return return_list
 
     def set_function(self, function_string: str):

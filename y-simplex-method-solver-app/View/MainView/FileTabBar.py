@@ -3,7 +3,6 @@ from Model import SimplexFile
 from typing import List
 from .FileView import FileView
 from Controller import SettingsController
-import os
 
 
 class FileTabBar(QTabWidget):

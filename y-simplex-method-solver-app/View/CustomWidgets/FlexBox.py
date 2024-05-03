@@ -13,14 +13,17 @@ class Direction(Enum):
 
 
 class FlexBox(QScrollArea):
-    def __init__(self, direction: Direction = Direction.Row, parent: QWidget | None = None, gap: int = 5, deduce_element_size: bool = False, element_size: int = 75, deduce_limits: bool = False, limits: int = 2):
+    def __init__(self, direction: Direction = Direction.Row, parent: QWidget | None = None, gap: int = 5, deduce_element_size: bool = False, element_size: int = 75, deduce_limits: bool = False, limits: int = 2, use_scroll_bar: bool = True ):
         super().__init__(parent)
         self.direction = direction
         self.main_layout: QHBoxLayout | QVBoxLayout = QVBoxLayout(self) if self.direction == Direction.Row else QHBoxLayout(self)
         self.gap = gap
-        if direction == Direction.Row:
+        if use_scroll_bar and direction == Direction.Row:
             self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        if direction == Direction.Column:
+        elif use_scroll_bar and direction == Direction.Column:
+            self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        else:
+            self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.automatically_deduce_limits = deduce_limits
         self.deduce_element_size = deduce_element_size
