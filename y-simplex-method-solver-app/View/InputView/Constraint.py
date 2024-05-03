@@ -1,20 +1,21 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QApplication
 from .NumberLineEdit import NumberLineEdit
 from .VariableInputView import VariableInputView
 from Model import ProblemType
 
 
 class Constraint(QWidget):
-    def __init__(self, var_no=2, problem=ProblemType.Maximization):
+    def __init__(self, parent=None, var_no=2, problem=ProblemType.Maximization):
         super().__init__()
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
-        self.equals = NumberLineEdit()
+        self.equals = NumberLineEdit(parent)
         self.eq_label = QLabel(f" {"\u2265" if problem == ProblemType.Maximization else "\u2264"} ")
         self.layout.addWidget(self.equals)
         self.layout.addWidget(self.eq_label)
         self.vars = []
         self.synchronize_variables(var_no)
+        self.value_change_callbacks = []
 
     def set_problem(self, problem: ProblemType):
         if problem is ProblemType.Maximization:
@@ -30,9 +31,17 @@ class Constraint(QWidget):
         else:
             old_len = len(self.vars)
             for i in range(len(self.vars), var_no):
-                self.vars.append(VariableInputView(i))
+                self.vars.append(VariableInputView(i, self.parentWidget()))
             for i in range(old_len, len(self.vars)):
                 self.layout.addWidget(self.vars[i])
+
+    def get_variables_list(self):
+        return_list = [self.equals.get_value()]
+        for i in self.vars:
+            return_list.append(i.get_value())
+        for a in self.value_change_callbacks:
+            a(return_list)
+        return return_list
 
     def get_variables_string(self):
         return_string = ""
@@ -46,6 +55,3 @@ class Constraint(QWidget):
         self.equals.set_value(constraint[-1])
         for i in range(0, len(self.vars)):
             self.vars[i].set_value(constraint[i])
-
-    def on_value_change(self):
-        self.equals.get_value()

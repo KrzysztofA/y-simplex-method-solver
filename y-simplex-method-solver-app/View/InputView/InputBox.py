@@ -7,8 +7,8 @@ from typing import Dict
 
 
 class InputBox(QScrollArea):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.layout = QVBoxLayout()
         label = QLabel("Function:")
         label.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed))
@@ -16,7 +16,7 @@ class InputBox(QScrollArea):
 
         self.widget = QWidget(self)
         self.setWidget(self.widget)
-        self.function = Function()
+        self.function = Function(parent)
         self.layout.addWidget(self.function)
         self.setMinimumSize(320, 250)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
@@ -54,7 +54,7 @@ class InputBox(QScrollArea):
         else:
             old_len = len(self.constraints)
             for i in range(len(self.constraints), const_no):
-                self.constraints.append(Constraint(self.var_no, self.problem))
+                self.constraints.append(Constraint(self.parentWidget(), self.var_no, self.problem))
             for i in range(old_len, len(self.constraints)):
                 self.layout.addWidget(self.constraints[i])
 
@@ -69,6 +69,12 @@ class InputBox(QScrollArea):
 
     def get_constraints(self):
         return [a.get_variables_string() for a in self.constraints]
+
+    def get_all_list(self):
+        return_list = [self.function.get_variables_list()]
+        for constraint in self.constraints:
+            return_list.append(constraint.get_variables_list())
+        return return_list
 
     def set_function(self, function_string: str):
         self.function.set_variables_from_string(function_string)

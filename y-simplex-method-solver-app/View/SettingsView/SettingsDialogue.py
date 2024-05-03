@@ -1,8 +1,11 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDialog, QGridLayout, QDialogButtonBox, QStackedWidget
 from Controller import SettingsController
+from .ExportSettings import ExportSettings
 from .GeneralSettings import GeneralSettings
 from .SettingsMenu import SettingsMenu
+from .EditorSettings import EditorSettings
+from .PerformanceSettings import PerformanceSettings
 from PyQt6.QtWidgets import QApplication
 import os
 
@@ -10,7 +13,6 @@ import os
 class SettingsDialogue(QDialog):
     def __init__(self, parent=None):
         super(SettingsDialogue, self).__init__(parent)
-
         self.setWindowTitle("Settings")
         qbuttons = QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Apply | QDialogButtonBox.StandardButton.Cancel
         self.setContentsMargins(0, 0, 0, 0)
@@ -26,7 +28,14 @@ class SettingsDialogue(QDialog):
         self.settings_view = QStackedWidget()
         self.settings_menu = SettingsMenu(self.settings_view)
         self.general_settings = GeneralSettings()
+        self.editor_settings = EditorSettings()
+        self.export_settings = ExportSettings()
+        self.performance_settings = PerformanceSettings()
         self.settings_view.addWidget(self.general_settings)
+        self.settings_view.addWidget(self.editor_settings)
+        self.settings_view.addWidget(self.export_settings)
+        self.settings_view.addWidget(self.performance_settings)
+        self.settings_menu.to_change = self.settings_view
 
         self.grid_box.setVerticalSpacing(0)
         self.grid_box.setContentsMargins(0, 0, 0, 0)

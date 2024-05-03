@@ -1,4 +1,6 @@
-from PyQt6.QtCore import Qt, QSize
+import math
+
+from PyQt6.QtCore import Qt, QSize, QPointF
 from PyQt6.QtGui import QResizeEvent
 from PyQt6.QtWidgets import QWidget, QCheckBox, QVBoxLayout, QLabel, QScrollArea, QHBoxLayout, QSizePolicy
 import pyqtgraph as pg
@@ -19,6 +21,7 @@ class GraphOutputView(QScrollArea):
         self.main_widget = QWidget(self)
         self.setWidget(self.main_widget)
         self.plot = pg.PlotWidget(self)
+        self.plot.setMenuEnabled(False)
         self.plot.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.vbox = QVBoxLayout()
         self.main_widget.setLayout(self.vbox)
@@ -30,14 +33,24 @@ class GraphOutputView(QScrollArea):
         self.variables_box_layout = QVBoxLayout()
         self.variables_box.setLayout(self.variables_box_layout)
         self.vbox.addWidget(self.variables_box)
+
         self.variables: List[QCheckBox] = []
         self.checked_boxes: List[QCheckBox] = []
         self.checked_boxes_indexes: Tuple[int, int] = (0, 0)
         self.synchronize_variables(2)
         self.resizeEvent = self.on_resize
         self.solution_view = pg.ScatterPlotItem()
+        self.solution_view.setPen(pg.mkPen(color=(100, 255, 100), width=5))
         self.solution_view.setData()
         self.plot.addItem(self.solution_view)
+        self.function_line = pg.InfiniteLine(0, 0, movable=False, pen=pg.mkPen(color=(255, 100, 100), width=3))
+        self.plot.addItem(self.function_line)
+        self.constraint_lines = []
+        self.plot.getPlotItem().getAxis('left').setWidth(40)
+        self.plot.getPlotItem().getAxis('bottom').setHeight(40)
+
+        self.constraint_functions = [[]]
+        self.function_function = []
 
     def synchronize_variables(self, var_no: int):
         if var_no < len(self.variables):
@@ -76,6 +89,7 @@ class GraphOutputView(QScrollArea):
         if len(self.checked_boxes) == 2:
             self.checked_boxes_indexes = (
                 self.variables.index(self.checked_boxes[0]), self.variables.index(self.checked_boxes[1]))
+            self.set_labels()
 
     def on_check(self, box: QCheckBox):
         if box.checkState() == Qt.CheckState.Unchecked and box in self.checked_boxes:
@@ -88,7 +102,13 @@ class GraphOutputView(QScrollArea):
         if len(self.checked_boxes) >= 2:
             self.checked_boxes_indexes = (
                 self.variables.index(self.checked_boxes[0]), self.variables.index(self.checked_boxes[1]))
+            self.set_labels()
+            self.set_constraints_values()
         self.display_selected_variables()
+
+    def set_labels(self):
+        self.plot.getPlotItem().setLabel('bottom', self.checked_boxes[0].text())
+        self.plot.getPlotItem().setLabel('left', self.checked_boxes[1].text())
 
     def change_grid_horizontal_limits(self, new_limits: int):
         if new_limits != self.grid_h_limits:
@@ -153,3 +173,47 @@ class GraphOutputView(QScrollArea):
         if self.solution_ready:
             point = (self.results[self.checked_boxes_indexes[0] + 1], self.results[self.checked_boxes_indexes[1] + 1])
             self.solution_view.setData([point[0]], [point[1]])
+
+    def set_function(self, function):
+        function_float = [self.get_float(a) for a in function]
+        function_points = [a/function_float[0] for a in function_float[1:]]
+        angle = self.get_angle(function_points)
+        self.function_line.setPos(QPointF(function_points[self.checked_boxes_indexes[0]], function_points[self.checked_boxes_indexes[1]]))
+        self.function_line.setAngle(angle)
+
+    def update_constraint_functions(self, functions):
+        self.constraint_functions = [[self.get_float(a)/self.get_float(b[0]) if self.get_float(b[0]) != 0 else 0 for a in b[1:]] for b in functions]
+        if len(self.constraint_functions) < len(self.constraint_lines):
+            for i in range(len(self.constraint_functions), len(self.constraint_lines)):
+                self.plot.removeItem(self.constraint_lines[i])
+
+        elif len(self.constraint_functions) > len(self.constraint_lines):
+            for i in range(len(self.constraint_lines), len(self.constraint_functions)):
+                angle = self.get_angle(self.constraint_functions[i])
+                self.constraint_lines.append(pg.InfiniteLine(QPointF(self.constraint_functions[i][self.checked_boxes_indexes[0]], self.constraint_functions[i][self.checked_boxes_indexes[1]]), angle))
+                self.plot.addItem(self.constraint_lines[-1])
+
+        self.set_constraints_values()
+
+    def set_constraints_values(self):
+        for i in range(len(self.constraint_lines)):
+            self.set_constraint_values(i, self.constraint_functions[i])
+
+    def set_constraint_values(self, index, function):
+        angle = self.get_angle(function)
+        self.constraint_lines[index].setPos(QPointF(function[self.checked_boxes_indexes[0]], function[self.checked_boxes_indexes[1]]))
+        self.constraint_lines[index].setAngle(angle)
+
+    def get_angle(self, function):
+        if function[self.checked_boxes_indexes[0]] == 0:
+            angle = 0
+        elif function[self.checked_boxes_indexes[1]] == 0:
+            angle = 90
+        else:
+            angle = math.degrees(
+                math.atan(function[self.checked_boxes_indexes[0]] / function[self.checked_boxes_indexes[1]]))
+        return angle
+
+    @staticmethod
+    def get_float(value_string):
+        return float(value_string.split("/")[0]) / float(value_string.split("/")[1]) if "/" in value_string else float(value_string)

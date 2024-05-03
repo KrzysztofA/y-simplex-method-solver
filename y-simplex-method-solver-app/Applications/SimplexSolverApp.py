@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QFileDialog, QMessageBox, QStyle, QStyleFactory, QProxyStyle
+from PyQt6.QtCore import Qt
 
 from Controller.SettingsController import SettingsController
 from Model import SimplexFile
@@ -14,10 +15,15 @@ import os
 def custom_export_factory(file_extensions):
     def custom_export(function):
         def wrapper(*args, **kwargs):
+            current_file = args[0].main_window.current_file()
+            if current_file is False:
+                QMessageBox.critical(args[0].main_window, "Error", "Please select a file.")
+                return
             dir_ = QFileDialog.getSaveFileName(None, 'Select a folder:',
                                                f'{SettingsController().default_save_path}', file_extensions)
             if dir_ is not None and dir_[0] != "":
-                last_solution = args[0].main_window.current_file().last_solution
+                current_file = args[0].main_window.current_file()
+                last_solution = current_file.last_solution
                 html_converter = args[0].html_converter
                 html_converter.set_problem(last_solution.problem)
                 html_converter.set_constraints(last_solution.constraints)
@@ -64,6 +70,9 @@ class SimplexSolverApp:
         self.main_window.menu_bar.save_action.triggered.connect(self.save_or_save_as)
         self.main_window.menu_bar.save_as_action.triggered.connect(self.save_as)
         self.main_window.menu_bar.load_action.triggered.connect(self.load_file)
+        self.main_window.menu_bar.set_variables_output.triggered.connect(lambda: self.main_window.tab_bar.set_all_view(0))
+        self.main_window.menu_bar.set_graph_output.triggered.connect(lambda: self.main_window.tab_bar.set_all_view(1))
+        self.main_window.menu_bar.set_working_output.triggered.connect(lambda: self.main_window.tab_bar.set_all_view(2))
 
         # App Call
         self.app.exec()

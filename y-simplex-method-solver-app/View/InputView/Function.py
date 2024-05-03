@@ -4,14 +4,15 @@ from Model import ProblemType
 
 
 class Function(QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.layout = QHBoxLayout()
         self.z_label = QLabel("Z \u2264 ")
         self.layout.addWidget(self.z_label)
         self.setLayout(self.layout)
         self.vars = []
         self.synchronize_variables(2)
+        self.value_change_callbacks = []
 
     def set_problem(self, problem: ProblemType):
         if problem is ProblemType.Maximization:
@@ -27,9 +28,17 @@ class Function(QWidget):
         else:
             old_len = len(self.vars)
             for i in range(len(self.vars), var_no):
-                self.vars.append(VariableInputView(i))
+                self.vars.append(VariableInputView(i, self.parent()))
             for i in range(old_len, len(self.vars)):
                 self.layout.addWidget(self.vars[i])
+
+    def get_variables_list(self):
+        return_list = ['1']
+        for i in self.vars:
+            return_list.append(i.get_value())
+        for a in self.value_change_callbacks:
+            a(return_list)
+        return return_list
 
     def get_variables_string(self):
         return_string = ""

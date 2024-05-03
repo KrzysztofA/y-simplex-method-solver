@@ -63,3 +63,7 @@ class FileTabBar(QTabWidget):
         if len(self.open_files) == 0:
             return False
         return self.open_files[self.currentIndex()]
+
+    def set_all_view(self, index: int):
+        for i in self.open_files:
+            i.output_box.set_view(index)
