@@ -92,9 +92,14 @@ namespace yasuzume::simplex
     // Find Pivot by sorting the candidates
 
     std::vector<Fraction> candidates {};
-    for( auto i { 0 }; i < std::ssize( index_column ) - 1; i++ ) candidates.emplace_back( last_column[ i ] / index_column[ i ] );
+    for( auto i { 0 }; i < std::ssize( index_column ) - 1; i++ ) candidates.emplace_back( index_column[ i ] != 0 ? last_column[ i ] / index_column[ i ] : 0 );
     auto                                                                      enumerated_candidates { enumerate<Fraction>( candidates ) };
-    std::erase_if( enumerated_candidates, []( const Enumerator<Fraction>& _item ) { return _item.value < 0; } );
+    std::erase_if( enumerated_candidates, []( const Enumerator<Fraction>& _item ) { return _item.value <= 0; } );
+    if( enumerated_candidates.empty() )
+    {
+      non_feasible = true;
+      return;
+    }
     std::ranges::sort( enumerated_candidates, []( const Enumerator<Fraction>& _item, const Enumerator<Fraction>& _item_2 ) { return _item.value < _item_2.value; } );
     const auto                                                                pivot_y { enumerated_candidates[ 0 ].index };
 

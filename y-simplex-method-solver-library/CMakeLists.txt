@@ -26,23 +26,21 @@ add_library (y-simplex-method-solver SHARED
 			"Headers/Simplex.hpp"		
 			"Headers/ProblemType.inl"
 			"Source/Simplex.cpp"
-			
+			"y-simplex-method-solver.cpp" 
+			"y-simplex-method-solver.hpp" 
 )
 
 # Add source to this project's executable.
 add_executable (y-simplex-method-solver-executable 
 				"y-simplex-method-solver.cpp" 
-				"y-simplex-method-solver.hpp"
+				"y-simplex-method-solver.hpp" 
 )
 
 add_executable(y-simplex-method-solver-tests 
 			   "Tests/SimplexTest.cpp"
-)
+)	
 
 enable_testing()
-
-find_package(Boost REQUIRED)
-find_package(Python3 REQUIRED)
 
 include_directories("Headers")
 target_include_directories(y-simplex-method-solver-executable  PRIVATE ${STRTK_INCLUDE_DIRS})
@@ -69,8 +67,8 @@ find_package(GTest CONFIG REQUIRED)
 include(GoogleTest)
 gtest_discover_tests(y-simplex-method-solver-tests)
 
-target_link_libraries(y-simplex-method-solver-executable PUBLIC Y::y-mathematics-library PUBLIC y-simplex-method-solver)
 target_link_libraries(y-simplex-method-solver PUBLIC Y::y-mathematics-library)
+target_link_libraries(y-simplex-method-solver-executable PUBLIC Y::y-mathematics-library PUBLIC y-simplex-method-solver)
 target_link_libraries(y-simplex-method-solver-tests PRIVATE GTest::gtest GTest::gtest_main PRIVATE y-simplex-method-solver PRIVATE Y::y-mathematics-library)
 
 set_property(TARGET y-simplex-method-solver PROPERTY CXX_STANDARD 26)

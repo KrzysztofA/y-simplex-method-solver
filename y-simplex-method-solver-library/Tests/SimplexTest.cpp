@@ -38,6 +38,45 @@ TEST( TestSimplex, SolvingCorrectnessMaximization )
   EXPECT_EQ( simplex_maximization_3.get_solution(), vec3 );
 }
 
+TEST( TestSimplex, MaximizationSpecialCases )
+{
+  simplex::Simplex simplex_maximization_1 {};
+  simplex_maximization_1.set_function( { 0, 0, 1, } );
+  simplex_maximization_1.add_constraint( { 20, 90, 15 } );
+  simplex_maximization_1.add_constraint( { 60, 80, 40 } );
+  simplex_maximization_1.build( simplex::ProblemType::Maximization );
+  simplex_maximization_1.compute_solution();
+  const std::vector<math::Fraction> vec1 { 0 };
+  EXPECT_EQ( simplex_maximization_1.get_solution(), vec1 );
+
+  simplex::Simplex simplex_maximization_2 {};
+  simplex_maximization_2.set_function( { 100, 200, 1, } );
+  simplex_maximization_2.add_constraint( { 0, 0, 0 } );
+  simplex_maximization_2.add_constraint( { 0, 0, 0 } );
+  simplex_maximization_2.build( simplex::ProblemType::Maximization );
+  simplex_maximization_2.compute_solution();
+  const std::vector<math::Fraction> vec2 { 0 };
+  EXPECT_EQ( simplex_maximization_2.get_solution(), vec2 );
+
+  simplex::Simplex simplex_maximization_3 {};
+  simplex_maximization_3.set_function( { 0, 0, 1, } );
+  simplex_maximization_3.add_constraint( { 0, 0, 0 } );
+  simplex_maximization_3.add_constraint( { 0, 0, 0 } );
+  simplex_maximization_3.build( simplex::ProblemType::Maximization );
+  simplex_maximization_3.compute_solution();
+  const std::vector<math::Fraction> vec3 { 0 };
+  EXPECT_EQ( simplex_maximization_3.get_solution(), vec3 );
+
+  simplex::Simplex simplex_maximization_4 {};
+  simplex_maximization_4.set_function( { 12, 20, 1, } );
+  simplex_maximization_4.add_constraint( { 0, 1, 12 } );
+  simplex_maximization_4.add_constraint( { 1, 0, 41 } );
+  simplex_maximization_4.build( simplex::ProblemType::Maximization );
+  simplex_maximization_4.compute_solution();
+  const std::vector<math::Fraction> vec4 { 41, 12, 732 };
+  EXPECT_EQ( simplex_maximization_4.get_solution(), vec4 );
+}
+
 TEST( TestSimplex, SolvingCorrectnessMinimization )
 {
   simplex::Simplex simplex_minimization_1 {};

@@ -5,7 +5,7 @@ import subprocess
 class SimplexBackendController(metaclass=Singleton):
     def __init__(self):
         self.problem_type: ProblemType = ProblemType.Maximization
-        self.collect_steps: bool = False
+        self.collect_steps: bool = True
         self.values: [] = []
 
     def set_problem(self, problem):

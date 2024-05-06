@@ -1,9 +1,11 @@
 import math
 
 from PyQt6.QtCore import Qt, QSize, QPointF
-from PyQt6.QtGui import QResizeEvent
+from PyQt6.QtGui import QResizeEvent, QPolygonF
 from PyQt6.QtWidgets import QWidget, QCheckBox, QVBoxLayout, QLabel, QScrollArea, QHBoxLayout, QSizePolicy
 import pyqtgraph as pg
+from .Line2D import *
+from .BoundingRegion2D import *
 from typing import List, Tuple
 
 
@@ -43,11 +45,14 @@ class GraphOutputView(QScrollArea):
         self.solution_view.setPen(pg.mkPen(color=(100, 255, 100), width=5))
         self.solution_view.setData()
         self.plot.addItem(self.solution_view)
-        self.function_line = pg.InfiniteLine(0, 0, movable=False, pen=pg.mkPen(color=(255, 100, 100), width=3))
-        self.plot.addItem(self.function_line)
-        self.constraint_lines = []
+        self.constraint_lines: List[Line2D] = []
         self.plot.getPlotItem().getAxis('left').setWidth(40)
         self.plot.getPlotItem().getAxis('bottom').setHeight(40)
+        self.plot.setAspectLocked(True)
+        self.plot.getPlotItem().setLimits(xMin=0, yMin=0)
+        # TODO
+        self.bounding_region = BoundingRegion2D()
+        self.plot.getPlotItem().addItem(self.bounding_region)
 
         self.constraint_functions = [[]]
         self.function_function = []
@@ -103,7 +108,7 @@ class GraphOutputView(QScrollArea):
             self.checked_boxes_indexes = (
                 self.variables.index(self.checked_boxes[0]), self.variables.index(self.checked_boxes[1]))
             self.set_labels()
-            self.set_constraints_values()
+            self.set_constraints_indexes()
         self.display_selected_variables()
 
     def set_labels(self):
@@ -157,7 +162,6 @@ class GraphOutputView(QScrollArea):
 
     def set_result(self, result: []):
         self.results = [float(a.split("/")[0]) / float(a.split("/")[1]) if "/" in a else float(a) for a in result]
-        print(self.results)
         self.solution_ready = True
         self.display_selected_variables()
 
@@ -174,51 +178,55 @@ class GraphOutputView(QScrollArea):
             point = (self.results[self.checked_boxes_indexes[0] + 1], self.results[self.checked_boxes_indexes[1] + 1])
             self.solution_view.setData([point[0]], [point[1]])
 
-    def set_function(self, function):
-        angle = self.get_angle(function)
-        self.function_line.setPos(self.get_point(function))
-        self.function_line.setAngle(angle)
-
     def update_constraint_functions(self, functions):
         self.constraint_functions = functions
         if len(self.constraint_functions) < len(self.constraint_lines):
             for i in range(len(self.constraint_functions), len(self.constraint_lines)):
                 self.plot.removeItem(self.constraint_lines[i])
+                self.constraint_lines.pop(i)
 
         elif len(self.constraint_functions) > len(self.constraint_lines):
             for i in range(len(self.constraint_lines), len(self.constraint_functions)):
-                angle = self.get_angle(self.constraint_functions[i])
-                self.constraint_lines.append(pg.InfiniteLine(self.get_point(self.constraint_functions[i]), angle))
+                self.constraint_lines.append(Line2D(self.constraint_functions[i], self.checked_boxes_indexes[0] + 1, self.checked_boxes_indexes[1] + 1))
                 self.plot.addItem(self.constraint_lines[-1])
         self.set_constraints_values()
 
+    def set_constraints_indexes(self):
+        for i in self.constraint_lines:
+            i.set_index_x(self.checked_boxes_indexes[0] + 1)
+            i.set_index_y(self.checked_boxes_indexes[1] + 1)
+        points = self.get_all_intersections()
+        self.bounding_region.set_points(points)
+
     def set_constraints_values(self):
         for i in range(len(self.constraint_lines)):
-            self.set_constraint_values(i, self.constraint_functions[i])
+            self.constraint_lines[i].set_function(self.constraint_functions[i])
+        points = self.get_all_intersections()
+        self.bounding_region.set_points(points)
 
-    def set_constraint_values(self, index, function):
-        angle = self.get_angle(function)
-        self.constraint_lines[index].setPos(self.get_point(function))
-        self.constraint_lines[index].setAngle(angle)
+    def get_all_intersections(self) -> List[QPointF]:
+        points_list = [QPointF(0, 0)]
+        for i in range(len(self.constraint_lines)):
+            points_list.append(self.constraint_lines[i].intersect_x)
+            points_list.append(self.constraint_lines[i].intersect_y)
+            for j in range(i + 1, len(self.constraint_lines)):
+                intersect = get_lines_intersection(self.constraint_lines[i], self.constraint_lines[j])
+                if intersect is not None:
+                    points_list.append(intersect)
 
-    def get_point(self, function):
-        y_coefficient = function[self.checked_boxes_indexes[1] + 1]
-        x_coefficient = function[self.checked_boxes_indexes[0] + 1]
-        x_part = 0
-        y_part = 0
-        if x_coefficient != 0:
-            x_part = function[0] / x_coefficient
-        elif y_coefficient != 0:
-            y_part = function[0] / y_coefficient
+        for i in range(len(points_list) - 1, -1, -1):
+            if points_list[i].x() < 0 or points_list[i].y() < 0:
+                points_list.pop(i)
+                continue
+            for y in self.constraint_lines:
+                if not y.check_point_below(points_list[i]):
+                    points_list.pop(i)
+                    break
 
-        return QPointF(x_part, y_part)
+        for i in range(len(points_list) - 1, -1, -1):
+            for y in self.constraint_lines:
+                if not y.check_point_below(points_list[i]):
+                    points_list.pop(i)
+                    break
 
-    def get_angle(self, function):
-        from_point = self.get_point(function)
-        if function[self.checked_boxes_indexes[0]] == 0:
-            angle = 0
-        elif function[self.checked_boxes_indexes[1]] == 0:
-            angle = 90
-        else:
-            angle = math.degrees(math.atan2(function[self.checked_boxes_indexes[1] + 1] / function[0], function[self.checked_boxes_indexes[0] + 1] / function[0]))
-        return angle
+        return points_list
