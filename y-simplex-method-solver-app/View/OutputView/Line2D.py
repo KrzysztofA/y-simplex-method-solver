@@ -2,6 +2,7 @@ from pyqtgraph import InfiniteLine
 from PyQt6.QtCore import QPointF
 import math
 from typing import Tuple
+from Model import ProblemType
 
 
 class Line2D(InfiniteLine):
@@ -36,6 +37,12 @@ class Line2D(InfiniteLine):
             return
         self.index_y = index_y
         self.recalculate_line()
+
+    def check_point(self, point: QPointF, problem: ProblemType) -> bool:
+        if problem == ProblemType.Maximization:
+            return self.check_point_below(point)
+        elif problem == ProblemType.Minimization:
+            return self.check_point_above(point)
 
     def check_point_below(self, point: QPointF):
         true_y = self.equation[0] * point.x() + self.equation[1]

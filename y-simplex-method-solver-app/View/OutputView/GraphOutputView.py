@@ -7,6 +7,7 @@ import pyqtgraph as pg
 from .Line2D import *
 from .BoundingRegion2D import *
 from typing import List, Tuple
+from Model import ProblemType
 
 
 class GraphOutputView(QScrollArea):
@@ -50,10 +51,9 @@ class GraphOutputView(QScrollArea):
         self.plot.getPlotItem().getAxis('bottom').setHeight(40)
         self.plot.setAspectLocked(True)
         self.plot.getPlotItem().setLimits(xMin=0, yMin=0)
-        # TODO
+        self.problem: ProblemType = ProblemType.Maximization
         self.bounding_region = BoundingRegion2D()
         self.plot.getPlotItem().addItem(self.bounding_region)
-
         self.constraint_functions = [[]]
         self.function_function = []
 
@@ -219,14 +219,26 @@ class GraphOutputView(QScrollArea):
                 points_list.pop(i)
                 continue
             for y in self.constraint_lines:
-                if not y.check_point_below(points_list[i]):
+                if not y.check_point(points_list[i], self.problem):
                     points_list.pop(i)
                     break
 
+        """
         for i in range(len(points_list) - 1, -1, -1):
             for y in self.constraint_lines:
                 if not y.check_point_below(points_list[i]):
                     points_list.pop(i)
                     break
+        """
 
         return points_list
+
+    def change_problem(self, problem_type: ProblemType):
+        if problem_type == ProblemType.Maximization:
+            self.plot.getPlotItem().getViewBox().setBackgroundColor(QColor(0))
+            self.bounding_region.set_color(QColor(10, 10, 255, 175))
+        elif problem_type == ProblemType.Minimization:
+            self.plot.getPlotItem().getViewBox().setBackgroundColor(QColor(10, 10, 255, 175))
+            self.bounding_region.set_color(QColor(0))
+        points = self.get_all_intersections()
+        self.bounding_region.set_points(points)

@@ -29,3 +29,6 @@ class OutputBox(QTabWidget):
         if len(self.functions_cache) == 0 or functions[0] != self.functions_cache[0] or sorted(functions[1:]) != sorted(self.functions_cache[1:]):
             self.functions_cache = functions
             self.graph_view.update_constraint_functions(functions[1:])
+
+    def change_problem(self, problem):
+        self.graph_view.change_problem(problem)

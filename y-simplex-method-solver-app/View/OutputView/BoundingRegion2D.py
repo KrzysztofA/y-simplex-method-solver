@@ -1,6 +1,6 @@
 from pyqtgraph import GraphicsObject, mkPen, mkBrush
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtGui import QPolygonF, QPainter, QPicture
+from PyQt6.QtGui import QPolygonF, QPainter, QPicture, QColor
 from PyQt6.QtCore import QPointF, QRectF
 from typing import List
 
@@ -10,6 +10,7 @@ class BoundingRegion2D(GraphicsObject):
         super().__init__()
         self.parent = parent
         self.points = points
+        self.color = QColor(10, 10, 255, 175)
         self.bounding_region = QPolygonF()
         self.picture = QPicture()
         self.update_points()
@@ -27,10 +28,14 @@ class BoundingRegion2D(GraphicsObject):
 
     def generate_picture(self):
         painter = QPainter(self.picture)
-        painter.setPen(mkPen((10, 10, 255, 175)))
-        painter.setBrush(mkBrush((10, 10, 255, 175)))
+        painter.setPen(mkPen(self.color))
+        painter.setBrush(mkBrush(self.color))
         painter.drawPolygon(self.bounding_region)
         painter.end()
+
+    def set_color(self, color: QColor):
+        self.color = color
+        self.generate_picture()
 
     def paint(self, painter, option, widget=None):
         painter.drawPicture(0, 0, self.picture)

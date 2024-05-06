@@ -93,6 +93,7 @@ class FileView(QWidget):
             self.problem = ProblemType.Maximization
         elif problem == 1:
             self.problem = ProblemType.Minimization
+        self.output_box.change_problem(self.problem)
 
     def compute_simplex(self):
         self.last_solution.problem = self.problem

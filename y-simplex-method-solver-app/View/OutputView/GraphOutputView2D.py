@@ -11,4 +11,3 @@ class GraphOutputView2D(QScrollArea):
         self.plot = pg.plot()
         self.vbox.addWidget(self.plot)
         self.vbox.addWidget(self.variables_box)
-
