@@ -45,7 +45,6 @@ class GraphOutputView(QScrollArea):
         self.solution_view = pg.ScatterPlotItem()
         self.solution_view.setPen(pg.mkPen(color=(100, 255, 100), width=5))
         self.solution_view.setData()
-        self.plot.addItem(self.solution_view)
         self.constraint_lines: List[Line2D] = []
         self.plot.getPlotItem().getAxis('left').setWidth(40)
         self.plot.getPlotItem().getAxis('bottom').setHeight(40)
@@ -56,6 +55,7 @@ class GraphOutputView(QScrollArea):
         self.plot.getPlotItem().addItem(self.bounding_region)
         self.constraint_functions = [[]]
         self.function_function = []
+        self.plot.addItem(self.solution_view)
 
     def synchronize_variables(self, var_no: int):
         if var_no < len(self.variables):
@@ -223,6 +223,9 @@ class GraphOutputView(QScrollArea):
                     points_list.pop(i)
                     break
 
+        if self.problem == ProblemType.Minimization:
+            points_list.insert(0, QPointF(0, 0))
+
         """
         for i in range(len(points_list) - 1, -1, -1):
             for y in self.constraint_lines:
@@ -234,6 +237,9 @@ class GraphOutputView(QScrollArea):
         return points_list
 
     def change_problem(self, problem_type: ProblemType):
+        if self.problem == problem_type:
+            return
+        self.problem = problem_type
         if problem_type == ProblemType.Maximization:
             self.plot.getPlotItem().getViewBox().setBackgroundColor(QColor(0))
             self.bounding_region.set_color(QColor(10, 10, 255, 175))
