@@ -12,12 +12,13 @@ class Direction(Enum):
     Column = 2
 
 
-class FlexBox(QScrollArea):
+class FlexBox(QWidget):
     def __init__(self, direction: Direction = Direction.Row, parent: QWidget | None = None, gap: int = 5, deduce_element_size: bool = False, element_size: int = 75, deduce_limits: bool = False, limits: int = 2, use_scroll_bar: bool = True ):
         super().__init__(parent)
         self.direction = direction
         self.main_layout: QHBoxLayout | QVBoxLayout = QVBoxLayout(self) if self.direction == Direction.Row else QHBoxLayout(self)
         self.gap = gap
+        """
         if use_scroll_bar and direction == Direction.Row:
             self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         elif use_scroll_bar and direction == Direction.Column:
@@ -25,14 +26,16 @@ class FlexBox(QScrollArea):
         else:
             self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        """
         self.automatically_deduce_limits = deduce_limits
         self.deduce_element_size = deduce_element_size
         self.element_size = element_size
-        self.elements_included_in_calculation = [self.verticalScrollBar() if direction == Direction.Row else self.horizontalScrollBar()]
+        self.elements_included_in_calculation = [] # [self.verticalScrollBar() if direction == Direction.Row else self.horizontalScrollBar()]
         self.on_resize_pre_events = []
         self.on_resize_post_events = []
         self.widgets: List[QWidget] = []
-        self.limits = self.deduce_limits(parent.size().width() if self.direction == Direction.Row else parent.size().height() ) if self.automatically_deduce_limits else self.limits = limits
+        self.limits = self.deduce_limits(parent.size().width() if self.direction == Direction.Row else parent.size().height()) if self.automatically_deduce_limits else limits
+        self.resizeEvent = self.on_resize
 
     def deduce_limits(self, available_size: int):
         max_size = 0
@@ -44,20 +47,25 @@ class FlexBox(QScrollArea):
                 max_size = max_size if max_size > widget.height() + self.gap else widget.height() + self.gap
         else:
             max_size = self.element_size
-        return int(available_size / max_size)
+        print(available_size)
+        print(max_size)
+        return int(available_size / max_size if max_size != 0 else 0)
 
     def on_resize(self, event: QResizeEvent):
         self.parent().resizeEvent(event)
         for pre_event in self.on_resize_pre_events:
-            pre_event()
+            pre_event(event)
         if self.direction == Direction.Column and event.size().height() + reduce(lambda x, y: x + y.height(), self.elements_included_in_calculation, 0) == event.oldSize().height() \
             or self.direction == Direction.Row and event.size().width() + reduce(lambda x, y: x + y.width(), self.elements_included_in_calculation, 0) == event.oldSize().width():
             return
         if self.automatically_deduce_limits:
-            self.limits = self.deduce_limits(event.size().width() if self.direction == Direction.Row else event.size().height())
+            limits = self.deduce_limits(event.size().width() if self.direction == Direction.Row else event.size().height())
+            if limits == self.limits:
+                return
+            self.limits = limits
             self.restructure()
         for post_event in self.on_resize_post_events:
-            post_event()
+            post_event(event)
 
     def change_limits(self, new_limits: int):
         self.automatically_deduce_limits = False
@@ -66,6 +74,7 @@ class FlexBox(QScrollArea):
             self.restructure()
 
     def add_widget(self, widget: QWidget):
+        self.widgets.append(widget)
         if self.main_layout.count() == 0:
             temp_widget = QWidget()
             temp = QHBoxLayout(temp_widget) if self.direction == Direction.Row else QVBoxLayout(temp_widget)

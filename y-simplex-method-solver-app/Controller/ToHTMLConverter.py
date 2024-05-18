@@ -46,15 +46,27 @@ class ToHTMLConverter:
 
     @staticmethod
     def value_format(value: str, all_values: bool = False) -> str:
-        return f"{"&frasl;".join([a for a in value.split("/")]) if "/" in value else value if value != "1" and value != "0" or all_values else ""}"
+        return f"{"&frasl;".join([a for a in value.split("/")]) if "/" in value else value if value != "0" or all_values else ""}"
+
+    @staticmethod
+    def variable_value_format(value: str, index: int):
+        return f"{value if value != "1" and value != "0" and value != "" else ""}{ToHTMLConverter.variable_format(value, index)}"
 
     @staticmethod
     def variable_format(value: str, index: int):
-        return f"x<sub>{index}</sub>" if value != "0" else ""
+        return f"x<sub>{index}</sub>" if value != "0" and value != "" else ""
 
     @staticmethod
     def all_but_last_format(char: str, value: str, index: int, max_index: int, all_values: bool = False) -> str:
         return "" if all_values is False and value == "0" or index == max_index else f"{char}"
+
+    @staticmethod
+    def all_but_first_format(char: str, value: str, index: int, min_index: int = 0, all_values: bool = False) -> str:
+        return "" if all_values is False and value == "0" or index == min_index else f"{char}"
+
+    @staticmethod
+    def full_value_format(char: str, value: str, index: int, min_index: int = 0, all_values: bool = False):
+        return f"{ToHTMLConverter.all_but_first_format(char, value, index, min_index, all_values)}{ToHTMLConverter.value_format(value)}{ToHTMLConverter.variable_format(value, index)}"
 
     def convert(self):
         lines = []
@@ -62,13 +74,16 @@ class ToHTMLConverter:
         lines.append(
             f"<p>{"Maximize" if self.problem_type == ProblemType.Maximization else "Minimize"} the following equation:</p>")
         lines.append(
-            f"<p>Z {function_delim} {"".join([f"{self.value_format(value)}{self.variable_format(value, index)}{self.all_but_last_format(" + ", value, index, len(self.equation) - 2)}" for index, value in enumerate(self.equation[:-1])])}</p>")
+            f"<p>Z {function_delim} {"".join([f"{self.full_value_format(" + ", value, index)}" for index, value in enumerate(self.equation[:-1])])}</p>")
         lines.append("<p>Subject to constraints:</p>")
         lines.append("<p>")
         for i in self.constraints:
-            i_arr = [a.strip() for a in i.split(",")]
-            lines.append(
-                f"<div>{"".join([f"{self.value_format(value)}{self.variable_format(value, index)}{self.all_but_last_format(" + ", value, index, len(i_arr) - 2)}" for index, value in enumerate(i_arr[:-1])])} {function_delim} {self.value_format(i_arr[-1], True)}</div>")
+            i_arr = [self.value_format(a.strip()) for a in i.split(",")]
+            i_arr = list(map(lambda a: self.variable_value_format(a[1], a[0]) if a[0] != len(i_arr) - 1 else a[1], enumerate(i_arr)))
+            i_arr = list(filter(lambda a: a != "", i_arr))
+            for it in range(1, len(i_arr) - 1):
+                i_arr.insert(it, " + ")
+            lines.append(f"<div>{"".join(i_arr[:-1])} {function_delim} {i_arr[-1]}</div>")
         lines.append("</p>")
         if len(self.steps) != 0:
             for i in range(0, len(self.steps)):

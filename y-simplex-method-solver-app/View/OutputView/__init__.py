@@ -1,4 +1,4 @@
 from .OutputBox import *
-from .TableOutputView import *
+from .WorkingOutView import *
 from .GraphOutputView import *
 from .VariableOutputView import *

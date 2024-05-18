@@ -84,9 +84,11 @@ class FileView(QWidget):
         self.input_box.set_function(file.input.function_input)
         self.input_box.set_constraints_values(file.input.constraints)
         self.output_box.set_result(file.output.result.solution.split())
+        self.output_box.pass_result_struct(file.output.result)
         self.file_name = file.filename
         self.directory = file.filedir
         self.refresh_graphs()
+        self.output_box.change_problem(self.problem)
 
     def set_problem(self, problem: int):
         if problem == 0:
@@ -101,7 +103,11 @@ class FileView(QWidget):
         SimplexBackendController().set_values(self.input_box.get_all_variables())
         result_raw = SimplexBackendController().collect_values()
         self.last_solution.result = o_parse_results(result_raw)
+        if self.last_solution.result.solution == "0":
+            return
+        print(self.last_solution.result)
         self.output_box.set_result(self.last_solution.result.solution.split())
+        self.output_box.pass_result_struct(self.last_solution.result)
         self.last_solution.constraint_no = self.constraint_number.value()
         self.last_solution.variable_no = self.variable_number.value()
         self.last_solution.function = self.input_box.get_function()
@@ -118,6 +124,8 @@ class FileView(QWidget):
             test = test.parent()
 
         if check and type(old_widget) is NumberLineEdit:
+            if old_widget.text() == "":
+                old_widget.setText("0")
             self.refresh_graphs()
 
     def refresh_graphs(self):

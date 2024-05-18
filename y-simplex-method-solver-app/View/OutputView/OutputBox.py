@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QTabWidget, QSizePolicy
 from .SolutionView import SolutionView
 from .GraphOutputView import GraphOutputView
+from .WorkingOutView import WorkingOutView
 
 
 class OutputBox(QTabWidget):
@@ -11,7 +12,8 @@ class OutputBox(QTabWidget):
         self.addTab(self.solution_view, "Solution View")
         self.graph_view = GraphOutputView(self)
         self.addTab(self.graph_view, "Graph View")
-        self.addTab(QWidget(self), "Full Output View")
+        self.working_out_view = WorkingOutView(self)
+        self.addTab(self.working_out_view, "Full Output View")
         self.functions_cache = []
 
     def synchronize_variables(self, var_no):
@@ -21,6 +23,9 @@ class OutputBox(QTabWidget):
     def set_result(self, result: []):
         self.solution_view.set_result(result)
         self.graph_view.set_result(result)
+
+    def pass_result_struct(self, result_struct):
+        self.working_out_view.set_results(result_struct)
 
     def set_view(self, index):
         self.setCurrentIndex(index)
