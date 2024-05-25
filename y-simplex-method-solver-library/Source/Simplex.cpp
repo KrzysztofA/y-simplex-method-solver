@@ -76,6 +76,16 @@ namespace yasuzume::simplex
     if( non_feasible ) return;
     if( cache_steps ) steps.emplace_back( matrix_representation );
 
+    // Check if constrains are satisfied
+    solved = check_if_solved();
+
+    if (!solved && steps.size() % 6 == 0 && check_if_looping()) 
+    {
+      non_feasible = true;
+      return;
+    }
+    if (solved) return;
+
     std::stringstream string_stream {};
 
     // Identify most negative entry in the bottom row
@@ -123,11 +133,6 @@ namespace yasuzume::simplex
       string_stream << "}";
       operations.emplace_back( string_stream.str() );
     }
-
-    // Check if constrains are satisfied
-    solved = check_if_solved();
-
-    if( !solved && steps.size() % 6 == 0 && check_if_looping() ) non_feasible = true;
   }
 
   void Simplex::compute_solution()
@@ -138,7 +143,6 @@ namespace yasuzume::simplex
       next();
       if( non_feasible ) return;
     }
-    if( cache_steps ) steps.emplace_back( matrix_representation );
     cache_solution();
   }
 
@@ -147,6 +151,7 @@ namespace yasuzume::simplex
     assert( solved );
     if( non_feasible ) return;
     solution = problem_type == ProblemType::Maximization ? get_maximization_solution() : get_minimization_solution();
+    if (std::ranges::all_of( solution, [](const Fraction& _fraction) { return _fraction == 0; })) solution = { 0 };
   }
 
   void Simplex::set_cache_steps( const bool& _cache_steps )

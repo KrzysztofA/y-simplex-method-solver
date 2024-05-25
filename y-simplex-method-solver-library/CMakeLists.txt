@@ -6,11 +6,11 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("y-simplex-method-solver" VERSION 0.0.6)
+project ("y-simplex-method-solver" VERSION 0.0.7)
 
-set(INCLUDEDIR "D:/Libraries/Include")
-set(LIBDIR "D:/Libraries/Lib")
-set(BINDIR "D:/Libraries/bin")
+set(INCLUDEDIR $ENV{INCLDIR})
+set(LIBDIR $ENV{LIBDIR})
+set(BINDIR $ENV{BINDIR})
 
 include(GNUInstallDirs)
 include(${LIBDIR}/cmake/y-mathematics-library/y-mathematics-library.cmake)

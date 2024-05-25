@@ -18,6 +18,7 @@ class SettingsController(metaclass=Singleton):
     def save(self):
         json_file = self.settings.to_json()
         if not path.isdir(self.settings_directory):
+            os.mkdir("Files")
             os.mkdir(self.settings_directory)
         with open(path.join(self.settings_directory, "settings.json"), "w") as settings_file:
             settings_file.write(json_file)

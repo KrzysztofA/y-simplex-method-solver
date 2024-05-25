@@ -7,5 +7,5 @@ from typing import Dict
 @dataclass
 class ResultStruct:
     solution: str
-    steps: Dict[int, str]
-    operations: Dict[int, str]
+    steps: Dict[int, Dict[int, Dict[int, str]]]
+    operations: Dict[int, Dict[int, str]]
