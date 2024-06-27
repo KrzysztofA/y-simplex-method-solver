@@ -39,6 +39,5 @@ class MenuBar(QMenuBar):
         self.settings_action = edit_menu.addAction("&Settings")
         help_menu.addAction("Instruction")
         help_menu.addSeparator()
-        help_menu.addAction("About")
+        self.about_action = help_menu.addAction("About")
         help_menu.addAction("Credits")
-        help_menu.addAction("Contact")

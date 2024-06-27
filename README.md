@@ -31,7 +31,7 @@
 }
 -->
 
-# y-simplex-method-solver v0.4.8 (Windows)
+# y-simplex-method-solver v0.5.0 (Windows)
 
 ## Simplex Method Mathematical Software with C++ API and Python GUI
 

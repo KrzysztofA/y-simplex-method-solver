@@ -11,7 +11,7 @@ class GeneralSettings(QWidget):
         self.save_label = QLabel('Save Settings:')
         self.save_name_field = SaveFileNameField()
         self.save_dir_field = SaveDirectoryField()
-        self.cache_last_dir_field = QCheckBox("Automatically Save in Last Directory: ")
+        self.cache_last_dir_field = QCheckBox("Automatically Save in the last directory: ")
 
         self.cache_last_dir_field.stateChanged.connect(self.set_cache_last_dir)
 

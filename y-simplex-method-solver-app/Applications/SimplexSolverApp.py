@@ -11,6 +11,8 @@ from Controller import ToDocumentConverter, ToHTMLConverter, SaveLoadController
 import sys
 import os
 
+from View.HelpView import ContactView
+
 
 def custom_export_factory(file_extensions):
     def custom_export(function):
@@ -60,6 +62,7 @@ class SimplexSolverApp:
         self.main_window.setMinimumSize(640, 420)
         self.main_window.folder_view.working_directory_view.open_file_callbacks.append(self.open_file)
         self.settings_dialogue = SettingsDialogue()
+        self.about_dialogue = ContactView()
 
         # Stream from View To Controller
         self.main_window.menu_bar.new_action.triggered.connect(self.main_window.tab_bar.add_new_file)
@@ -67,6 +70,7 @@ class SimplexSolverApp:
         self.main_window.menu_bar.to_doc_action.triggered.connect(self.save_to_document_file)
         self.main_window.menu_bar.to_pdf_action.triggered.connect(self.save_to_pdf_file)
         self.main_window.menu_bar.settings_action.triggered.connect(self.settings_dialogue.exec)
+        self.main_window.menu_bar.about_action.triggered.connect(self.about_dialogue.exec)
         self.main_window.menu_bar.save_action.triggered.connect(self.save_or_save_as)
         self.main_window.menu_bar.save_as_action.triggered.connect(self.save_as)
         self.main_window.menu_bar.load_action.triggered.connect(self.load_file)
