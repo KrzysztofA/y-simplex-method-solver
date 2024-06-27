@@ -23,6 +23,9 @@ class WorkingOutView(QScrollArea):
         self.set_results(results)
 
     def set_results(self, results: ResultStruct | None):
+        # Clean View
+        self.clean()
+
         if results is None:
             self.vbox.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.top_label.setText("This will show step-by-step working out once a solution is computed")
@@ -42,3 +45,11 @@ class WorkingOutView(QScrollArea):
                 self.vbox.addWidget(self.steps[i])
             if len(self.row_operations) > i:
                 self.vbox.addWidget(self.row_operations[i])
+
+    def clean(self):
+        for step in self.steps:
+            self.vbox.removeWidget(step)
+        for row in self.row_operations:
+            self.vbox.removeWidget(row)
+        self.steps = []
+        self.row_operations = []

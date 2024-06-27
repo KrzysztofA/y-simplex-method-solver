@@ -8,4 +8,4 @@ class OperationText(QLabel):
         self.setWordWrap(True)
 
         # TODO Format text
-        self.text = "\n".join(text)
+        self.setText("".join(text))
