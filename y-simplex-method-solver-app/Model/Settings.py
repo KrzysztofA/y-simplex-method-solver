@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import auto
 from dataclasses_json import dataclass_json
 
 
@@ -13,6 +14,7 @@ class Settings:
     
     # Editor
     font_size: int = 8
+    default_theme: str = "OS Setting"
     
     # Export
     add_graphs_to_exports: bool = False
@@ -20,6 +22,7 @@ class Settings:
 
     # Performance
     compute_steps: bool = True
+    auto_refresh_graphs: bool = False
     add_working_out_to_exports: bool = False
 
     include_computed_steps: bool = True

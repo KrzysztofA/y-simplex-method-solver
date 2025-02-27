@@ -12,3 +12,7 @@ class ExportSettings(QWidget):
         self.vbox.addWidget(self.include_label)
         self.vbox.addWidget(self.include_graphs_to_export)
         self.setLayout(self.vbox)
+
+    def reset_setting(self):
+        self.include_graphs_to_export.setChecked(SettingsController().settings.add_graphs_to_exports)
+        

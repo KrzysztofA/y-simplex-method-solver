@@ -15,3 +15,8 @@ class PerformanceSettings(QWidget):
         self.vbox.addWidget(self.editor_performance_settings_label)
         self.vbox.addWidget(self.include_graphs_to_export)
         self.setLayout(self.vbox)
+
+    def reset_setting(self):
+        self.include_graphs_to_export.setChecked(SettingsController().settings.add_graphs_to_exports)
+        self.auto_refresh_graph.setChecked(SettingsController().settings.auto_refresh_graphs)
+        

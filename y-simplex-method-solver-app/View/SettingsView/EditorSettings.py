@@ -32,3 +32,8 @@ class EditorSettings(QWidget):
         self.vbox.addWidget(self.use_default_theme)
         self.vbox.addWidget(self.default_theme_combo_box)
         self.setLayout(self.vbox)
+    
+    def reset_setting(self):
+        self.font_size.setValue(SettingsController().settings.font_size)
+        self.default_theme_combo_box.setCurrentText(SettingsController().settings.default_theme)
+        

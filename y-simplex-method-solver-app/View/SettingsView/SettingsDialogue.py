@@ -44,21 +44,31 @@ class SettingsDialogue(QDialog):
         self.grid_box.addWidget(self.button_box, 1, 0, 1, 4, Qt.AlignmentFlag.AlignCenter)
 
     def accept_settings(self):
+        # On accept, save the settings
         SettingsController().save()
         self.accept()
 
     def reject_settings(self):
+        # On reject, load the former settings
         SettingsController().load()
-        self.general_settings.reset_setting()
+        self.reset_settings()
         self.reject()
 
     def apply(self):
+        # On apply, save the settings
         SettingsController().save()
 
     def exec(self):
-        self.general_settings.reset_setting()
+        # When dialog is executed, reset the settings
+        self.reset_settings()
         return super().exec()
 
     def open(self):
-        self.general_settings.reset_setting()
+        self.reset_settings()
         return super().open()
+
+    def reset_settings(self):
+        self.general_settings.reset_setting()
+        self.editor_settings.reset_setting()
+        self.export_settings.reset_setting()
+        self.performance_settings.reset_setting()
