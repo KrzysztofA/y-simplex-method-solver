@@ -10,7 +10,10 @@ class Settings:
     use_last_save_dir: bool = False
     default_save_name: str = "New Simplex Solution"
     open_in_new_tab: bool = True
-
+    
+    # Editor
+    font_size: int = 8
+    
     # Export
     add_graphs_to_exports: bool = False
     add_steps_to_exports: bool = False

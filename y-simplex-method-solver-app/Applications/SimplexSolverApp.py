@@ -83,16 +83,23 @@ class SimplexSolverApp:
 
     @custom_export_factory(file_extensions="HTML Files (*.html)")
     def save_to_html_file(self, directory):
+        # Use HTML converter to convert the current file to HTML
         self.html_converter.save_as_html(directory)
 
     @custom_export_factory(file_extensions="Document Files (*.docx *.rtf *.doc *.docm *.odt)")
     def save_to_document_file(self, directory):
+        # Use HTML converter to convert the current file to HTML
         self.doc_converter.set_lines(self.html_converter.convert())
+        
+        # Use Document converter to save the HTML to a document
         self.doc_converter.save_as_document(directory)
 
     @custom_export_factory(file_extensions="PowerPoint Files (*.pdf)")
     def save_to_pdf_file(self, directory):
+        # Use HTML converter to convert the current file to HTML
         self.pdf_converter.set_lines(self.html_converter.convert())
+
+        # Use PDF converter to save the HTML to a PDF
         self.pdf_converter.save_as_pdf(directory)
 
     def save_as(self):

@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QCheckBox, QVBoxLayout, QLabel, QSpinBox, QHBoxLayout, QComboBox, QApplication
+from numpy import minimum
 from Controller import SettingsController
 
 
@@ -8,8 +9,13 @@ class EditorSettings(QWidget):
         self.include_label = QLabel("General")
         self.font_size_widget = QWidget(self)
         self.font_size_layout = QHBoxLayout()
+        
+        # Font size settings
         self.font_size_label = QLabel("Font Size: ", self.font_size_widget)
-        self.font_size = QSpinBox(self.font_size_widget)
+        self.font_size = QSpinBox(self.font_size_widget, minimum=6, maximum=72, singleStep=1)
+        self.font_size.setValue(SettingsController().settings.font_size)
+        self.font_size.valueChanged.connect(lambda: SettingsController().change_font_size(self.font_size.value()))
+        
         self.font_size_layout.addWidget(self.font_size_label)
         self.font_size_layout.addWidget(self.font_size)
         self.font_size_widget.setLayout(self.font_size_layout)
