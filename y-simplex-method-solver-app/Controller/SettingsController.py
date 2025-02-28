@@ -18,6 +18,9 @@ class SettingsController(metaclass=Singleton):
     def change_font_size(self, font_size: int):
         self.settings.font_size = font_size
     
+    def change_font_style(self, font_style: str):
+        self.settings.font_style = font_style
+        
     def save(self):
         # Save the JSON file with settings        
         json_file = self.settings.to_json()
@@ -29,7 +32,7 @@ class SettingsController(metaclass=Singleton):
         self.default_save_path = path.join(self.settings.default_save_dir, self.settings.default_save_name)
         
         # Apply the settings which require applying
-        self.apply_font_size()
+        self.apply_font_settings()
 
     def load(self) -> bool:
         json_path = path.join(self.settings_directory, "settings.json")
@@ -54,6 +57,6 @@ class SettingsController(metaclass=Singleton):
                 self.settings.default_save_dir = str(path_obj.parent)
                 self.default_save_path = path.join(self.settings.default_save_dir, self.settings.default_save_name)
 
-    def apply_font_size(self):
-        temp_font = QFont("Arial", self.settings.font_size)
+    def apply_font_settings(self):
+        temp_font = QFont(self.settings.font_style, self.settings.font_size)
         QApplication.instance().setFont(temp_font)

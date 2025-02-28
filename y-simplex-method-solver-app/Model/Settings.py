@@ -13,6 +13,7 @@ class Settings:
     open_in_new_tab: bool = True
     
     # Editor
+    font_style: str = "Arial"
     font_size: int = 8
     default_theme: str = "OS Setting"
     
