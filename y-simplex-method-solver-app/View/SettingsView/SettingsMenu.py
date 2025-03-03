@@ -3,6 +3,9 @@ from PyQt6.QtCore import Qt
 
 
 class SettingsMenu(QWidget):
+    """
+    Widget containing the menu buttons for the settings dialogue.
+    """
     def __init__(self, to_change: QStackedWidget):
         super().__init__()
         self.to_change = to_change
@@ -25,6 +28,9 @@ class SettingsMenu(QWidget):
         self.vbox.setAlignment(Qt.AlignmentFlag.AlignTop)
 
     def select_button(self, index: int):
+        """
+        Selects the settings with the given index. Includes changing the color of the button with the given index to active color.
+        """
         self.buttons[index].setStyleSheet("background-color: rgba(60, 60, 60, 1); ")
         for button in enumerate(self.buttons):
             if button[0] == index:

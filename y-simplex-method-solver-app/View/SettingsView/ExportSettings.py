@@ -3,6 +3,9 @@ from Controller import SettingsController
 
 
 class ExportSettings(QWidget):
+    """
+    Export settings contains the settings for the exporting of data. It decides what data to include in the exports.
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.include_label = QLabel("Include following data:")

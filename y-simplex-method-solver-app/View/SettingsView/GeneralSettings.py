@@ -25,6 +25,7 @@ class GeneralSettings(QWidget):
         SettingsController().settings.use_last_save_dir = self.cache_last_dir_field.isChecked()
 
     def reset_setting(self):
+        # Resets all settings to the last saved settings
         self.cache_last_dir_field.setChecked(SettingsController().settings.use_last_save_dir)
         self.save_name_field.reset_setting()
         self.save_dir_field.reset_setting()

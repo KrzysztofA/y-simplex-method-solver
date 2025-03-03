@@ -4,6 +4,9 @@ from Controller import SettingsController
 
 
 class EditorSettings(QWidget):
+    """
+    EditorSettings class is a QWidget that contains the editor settings widgets.
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.include_label = QLabel("General")
@@ -50,6 +53,9 @@ class EditorSettings(QWidget):
         self.setLayout(self.vbox)
     
     def reset_setting(self):
+        """
+        Reset the settings to the default values.
+        """
         self.font_size.setValue(SettingsController().settings.font_size)
         self.default_theme_combo_box.setCurrentText(SettingsController().settings.default_theme)
         
