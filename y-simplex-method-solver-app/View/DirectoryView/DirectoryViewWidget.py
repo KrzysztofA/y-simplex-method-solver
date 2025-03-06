@@ -3,6 +3,9 @@ from .WorkingDirectoryView import WorkingDirectoryView
 
 
 class DirectoryViewWidget(QWidget):
+    """
+    This class is a widget that contains the WorkingDirectoryView and the Up button, allowing to view the current directory and to move up in the directory tree.
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.vbox = QVBoxLayout()

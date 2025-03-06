@@ -58,6 +58,9 @@ class GraphOutputView(QScrollArea):
         self.plot.addItem(self.solution_view)
 
     def synchronize_variables(self, var_no: int):
+        """
+        Synchronizes variables to be equal to the number of variables in the problem.
+        """
         if var_no < len(self.variables):
             for i in self.variables[var_no:]:
                 self.remove_from_grid(i)
@@ -74,11 +77,15 @@ class GraphOutputView(QScrollArea):
         self.synchronize_checked()
 
     def on_resize(self, event: QResizeEvent):
+        """
+        Resize event for the scroll area, resizes the plot and the variables box.
+        """
         self.parent().resizeEvent(event)
         self.plot.setMinimumWidth(event.size().width())
         self.plot.setMinimumHeight(int(event.size().height() * 3 / 5))
         if event.size().width() + self.verticalScrollBar().width() == event.oldSize().width():
             return
+        # Changes horizontal limits of the grid to be equal to the new size divided by a single variable width
         self.change_grid_horizontal_limits(event.size().width() / 75)
 
     def synchronize_checked(self):
@@ -97,6 +104,9 @@ class GraphOutputView(QScrollArea):
             self.set_labels()
 
     def on_check(self, box: QCheckBox):
+        """
+        Function which is called when a checkbox is checked or unchecked. It decides of the variables to be plotted. 
+        """
         if box.checkState() == Qt.CheckState.Unchecked and box in self.checked_boxes:
             box.setChecked(True)
         elif box not in self.checked_boxes and len(self.checked_boxes) >= 2:
@@ -112,15 +122,24 @@ class GraphOutputView(QScrollArea):
         self.display_selected_variables()
 
     def set_labels(self):
+        """
+        Sets labels to the variables boxes to be used in the plots.
+        """
         self.plot.getPlotItem().setLabel('bottom', self.checked_boxes[0].text())
         self.plot.getPlotItem().setLabel('left', self.checked_boxes[1].text())
 
     def change_grid_horizontal_limits(self, new_limits: int):
+        """
+        Changes the horizontal limits of the grid to be equal to the new limits.
+        """
         if new_limits != self.grid_h_limits:
             self.grid_h_limits = new_limits
             self.restructure_grid()
 
     def add_to_grid(self, widget: QWidget):
+        """
+        Adds a widget to the grid layout.
+        """
         if self.variables_box_layout.count() == 0:
             temp_widget = QWidget()
             temp = QHBoxLayout(temp_widget)
@@ -139,6 +158,9 @@ class GraphOutputView(QScrollArea):
                 last_layout.addWidget(widget)
 
     def remove_from_grid(self, widget: QWidget):
+        """
+        Removes the widget from the grid layout.
+        """
         for i in range(self.variables_box_layout.count() - 1, -1, -1):
             item = self.variables_box_layout.itemAt(i).widget().layout()
             for j in range(item.count() - 1, -1, -1):
@@ -148,6 +170,9 @@ class GraphOutputView(QScrollArea):
         self.restructure_grid()
 
     def restructure_grid(self):
+        """
+        Restructures the grid layout to new demands. Creates the grid anew with provided variables.
+        """
         temp_arr = []
         for i in range(self.variables_box_layout.count() - 1, -1, -1):
             item = self.variables_box_layout.itemAt(i).widget()
@@ -161,25 +186,43 @@ class GraphOutputView(QScrollArea):
             self.add_to_grid(i)
 
     def set_result(self, result: []):
+        """
+        Sets the results of the simplex method to be displayed in the graph.
+        """
         self.results = [float(a.split("/")[0]) / float(a.split("/")[1]) if "/" in a else float(a) for a in result]
         self.solution_ready = True
         self.display_selected_variables()
 
     def on_constraint_change(self):
+        """
+        This method is called on constraints change. On change of constraints number or function, the solution is no longer valid, it needs to be recalculated.
+        """
         self.solution_ready = False
         self.solution_view.setData()
 
     def on_function_change(self):
+        """
+        This method is called on the main function change. On the change in the function the solution is no longer valid, it needs to be recalculated. 
+        """
         self.solution_ready = False
         self.solution_view.setData()
 
     def display_selected_variables(self):
+        """
+        Displays the graph of the selected variables.
+        """
         if self.solution_ready:
             point = (self.results[self.checked_boxes_indexes[0] + 1], self.results[self.checked_boxes_indexes[1] + 1])
             self.solution_view.setData([point[0]], [point[1]])
 
     def update_constraint_functions(self, functions):
+        """
+        Updates the constraint functions to be displayed in the graph.
+        """
         self.constraint_functions = functions
+        
+        # If the new length of the constraint functions is different than the constraint lines, update the constraints lines.
+        
         if len(self.constraint_functions) < len(self.constraint_lines):
             for i in range(len(self.constraint_functions), len(self.constraint_lines)):
                 self.plot.removeItem(self.constraint_lines[i])
@@ -192,6 +235,9 @@ class GraphOutputView(QScrollArea):
         self.set_constraints_values()
 
     def set_constraints_indexes(self):
+        """
+        TODO Comment this method
+        """
         for i in self.constraint_lines:
             i.set_index_x(self.checked_boxes_indexes[0] + 1)
             i.set_index_y(self.checked_boxes_indexes[1] + 1)
@@ -199,12 +245,18 @@ class GraphOutputView(QScrollArea):
         self.bounding_region.set_points(points)
 
     def set_constraints_values(self):
+        """
+        TODO Comment this method
+        """
         for i in range(len(self.constraint_lines)):
             self.constraint_lines[i].set_function(self.constraint_functions[i])
         points = self.get_all_intersections()
         self.bounding_region.set_points(points)
 
     def get_all_intersections(self) -> List[QPointF]:
+        """
+        TODO Comment this method
+        """
         points_list = [QPointF(0, 0)]
         for i in range(len(self.constraint_lines)):
             points_list.append(self.constraint_lines[i].intersect_x)
@@ -226,17 +278,12 @@ class GraphOutputView(QScrollArea):
         if self.problem == ProblemType.Minimization:
             points_list.insert(0, QPointF(0, 0))
 
-        """
-        for i in range(len(points_list) - 1, -1, -1):
-            for y in self.constraint_lines:
-                if not y.check_point_below(points_list[i]):
-                    points_list.pop(i)
-                    break
-        """
-
         return points_list
 
     def change_problem(self, problem_type: ProblemType):
+        """
+        Change the problem type to be displayed in the graph.
+        """
         if self.problem == problem_type:
             return
         self.problem = problem_type
