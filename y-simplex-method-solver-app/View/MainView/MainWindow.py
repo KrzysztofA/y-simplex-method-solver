@@ -8,6 +8,9 @@ from View.DirectoryView import WorkingDirectoryView, DirectoryViewWidget
 
 
 class MainWindow(QMainWindow):
+    """
+    Main Window of the application
+    """
     def __init__(self):
         super().__init__()
         load_dotenv()
@@ -31,4 +34,7 @@ class MainWindow(QMainWindow):
         self.show()
 
     def current_file(self):
+        """
+        Get the current file
+        """
         return self.tab_bar.current_file()

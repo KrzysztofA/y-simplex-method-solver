@@ -17,10 +17,11 @@ class SettingsMenu(QWidget):
         self.buttons[-1].clicked.connect(lambda: self.select_button(0))
         self.buttons.append(QPushButton('Editor'))
         self.buttons[-1].clicked.connect(lambda: self.select_button(1))
-        self.buttons.append(QPushButton('Export'))
-        self.buttons[-1].clicked.connect(lambda: self.select_button(2))
-        self.buttons.append(QPushButton('Performance'))
-        self.buttons[-1].clicked.connect(lambda: self.select_button(3))
+        #TODO: Implement the following sections
+        # self.buttons.append(QPushButton('Export'))
+        # self.buttons[-1].clicked.connect(lambda: self.select_button(2))
+        # self.buttons.append(QPushButton('Performance'))
+        # self.buttons[-1].clicked.connect(lambda: self.select_button(3))
         self.vbox.setContentsMargins(0, 10, 0, 0)
         self.select_button(0)
         for button in self.buttons:

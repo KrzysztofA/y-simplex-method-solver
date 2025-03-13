@@ -39,17 +39,17 @@ class EditorSettings(QWidget):
         self.use_default_theme = QCheckBox("Use Default Theme")
         self.default_theme_combo_box = QComboBox(self)
         self.default_theme_combo_box.addItem("OS Setting")
-        self.default_theme_combo_box.setCurrentText("OS Setting")
-        self.default_theme_combo_box.addItem("Light")
-        self.default_theme_combo_box.addItem("Dark")
+        # self.default_theme_combo_box.setCurrentText("OS Setting")
+        # self.default_theme_combo_box.addItem("Light")
+        # self.default_theme_combo_box.addItem("Dark")
         
         # Set up the widgets
         self.vbox = QVBoxLayout()
         self.vbox.addWidget(self.include_label)
         self.vbox.addWidget(self.font_style_widget)
         self.vbox.addWidget(self.font_size_widget)
-        self.vbox.addWidget(self.use_default_theme)
-        self.vbox.addWidget(self.default_theme_combo_box)
+        # self.vbox.addWidget(self.use_default_theme)
+        # self.vbox.addWidget(self.default_theme_combo_box)
         self.setLayout(self.vbox)
     
     def reset_setting(self):
