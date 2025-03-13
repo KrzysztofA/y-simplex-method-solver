@@ -31,17 +31,17 @@ class MenuBar(QMenuBar):
         edit_menu.addSeparator()
         self.settings_action = edit_menu.addAction("&Settings")
         
-        # View Menu Actions
-        self.workspace_view = view_menu.addAction("&Workspace")
-        self.workspace_view.setCheckable(True)
-        self.workspace_view.setChecked(True)
-        output_view = view_menu.addMenu("&Output")
-        self.graph_view = output_view.addAction("&Graph")
-        self.graph_view.setCheckable(True)
-        self.graph_view.setChecked(True)
-        self.working_view = output_view.addAction("&Work Out")
-        self.working_view.setCheckable(True)
-        self.working_view.setChecked(True)
+        # View Menu Actions TODO
+        # self.workspace_view = view_menu.addAction("&Workspace")
+        # self.workspace_view.setCheckable(True)
+        # self.workspace_view.setChecked(True)
+        # output_view = view_menu.addMenu("&Output")
+        # self.graph_view = output_view.addAction("&Graph")
+        # self.graph_view.setCheckable(True)
+        # self.graph_view.setChecked(True)
+        # self.working_view = output_view.addAction("&Work Out")
+        # self.working_view.setCheckable(True)
+        # self.working_view.setChecked(True)
         
         # Help Menu Actions
         self.instruction_action = help_menu.addAction("&Instruction")
